@@ -31,13 +31,7 @@
 <button onclick="toggleShuffle()">Modo Aleatorio: <span id='shuffleStatus'>Desactivado</span></button>
 <button onclick="toggleLoop()">Modo Bucle: <span id='loopStatus'>Desactivado</span></button>
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <div class="file-input-container">
-        <label>Selecciona archivos para subir:</label><br>
-        <input type="file" name="file" multiple>
-        <button type="submit">Subir</button>
-    </div>
-</form>
+<a href="{{ url_for('upload.upload_file') }}" class="btn">Subir nuevas canciones</a>
 
 <h2>Lista de Canciones</h2>
 <ul>
