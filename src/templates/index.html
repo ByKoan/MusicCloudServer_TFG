@@ -44,7 +44,12 @@
 <h2>Lista de Canciones</h2>
 <ul>
     {% for song in songs %}
-        <li><a href="javascript:void(0);" onclick="loadSong({{ loop.index0 }})">{{ song }}</a></li>
+        <li class="song-item">
+            <span class="song-title" onclick="loadSong({{ loop.index0 }})">{{ song }}</span>
+            <div class="song-actions">
+                <button class="delete-song-btn" data-filename="{{ song }}">Borrar</button>
+            </div>
+        </li>
     {% endfor %}
 </ul>
 

@@ -254,3 +254,49 @@ table td form {
 .delete:hover{
     background-color:#e43f3f;
 }
+
+.delete-song-btn {
+    background-color: #ff4c4c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.delete-song-btn:hover {
+    background-color: #e43f3f;
+}
+
+.song-item {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ccc;
+    transition: background 0.2s;
+}
+
+.song-item:hover {
+    background-color: #f0f0f0;
+}
+
+.song-title {
+    cursor: pointer;
+    flex-grow: 1; 
+}
+
+.song-actions button {
+    background-color: #ff4d4d;
+    border: none;
+    color: white;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: background 0.2s;
+}
+
+.song-actions button:hover {
+    background-color: #ff1a1a;
+}

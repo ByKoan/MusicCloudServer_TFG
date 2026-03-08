@@ -35,7 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 ]
             });
 
-            // Eliminamos los botones de 10s y usamos flechas
             navigator.mediaSession.setActionHandler('play', () => player.play());
             navigator.mediaSession.setActionHandler('pause', () => player.pause());
             navigator.mediaSession.setActionHandler('previoustrack', () => handlePreviousClick());
@@ -189,6 +188,38 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("activeUsers").textContent = data.active_users
         document.getElementById("totalSongs").textContent = data.total_songs
     }
+
+    // ===============================
+    // BORRAR CANCIONES
+    // ===============================
+    document.querySelectorAll('.delete-song-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const filename = btn.getAttribute('data-filename');
+            if (!filename) return;
+
+            const confirmDelete = confirm(`¿Estás seguro de que quieres borrar "${filename}"?`);
+            if (!confirmDelete) return;
+
+            try {
+                const res = await fetch('/delete_song', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({filename})
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    // Eliminar del DOM
+                    btn.parentElement.remove();
+                    alert(`"${filename}" borrada correctamente.`);
+                } else {
+                    alert(`Error: ${data.error}`);
+                }
+            } catch (err) {
+                alert(`Error al borrar la canción: ${err}`);
+            }
+        });
+    });
 
     setInterval(updateServerStats, 5000)
 
