@@ -300,3 +300,17 @@ table td form {
 .song-actions button:hover {
     background-color: #ff1a1a;
 }
+
+.stats-wrapper{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:40px;
+    margin-top:40px;
+    flex-wrap:wrap;
+}
+
+.stats-section{
+    width:45%;
+    min-width:400px;
+}

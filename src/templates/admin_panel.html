@@ -196,88 +196,107 @@
 </div>
 
 <!-- ========================= -->
-<!-- RECURSOS DEL SISTEMA -->
+<!-- STATS -->
 <!-- ========================= -->
 
-<h2>Recursos del sistema</h2>
+<div class="stats-wrapper">
 
-<div class="system-stats">
+    <!-- ========================= -->
+    <!-- RECURSOS DEL SISTEMA -->
+    <!-- ========================= -->
+    <div class="stats-section">
 
-    <div class="stat-box">
-        <h3>CPU</h3>
-        <canvas id="cpuChart"></canvas>
-        <p id="cpuText">{{ stats.cpu }}%</p>
+        <h2>Recursos del sistema</h2>
+
+        <div class="system-stats">
+
+            <div class="stat-box">
+                <h3>CPU</h3>
+                <canvas id="cpuChart"></canvas>
+                <p id="cpuText">{{ stats.cpu }}%</p>
+            </div>
+
+            <div class="stat-box">
+                <h3>RAM</h3>
+                <canvas id="ramChart"></canvas>
+                <p id="ramText">{{ stats.ram_percent }}%</p>
+            </div>
+
+            <div class="stat-box">
+                <h3>Disco</h3>
+                <canvas id="diskChart"></canvas>
+                <p id="diskText">{{ stats.disk_percent }}%</p>
+            </div>
+
+            <div class="stat-box">
+                <h3>Red - Subida</h3>
+                <canvas id="netUpChart"></canvas>
+                <p id="netUpText">0 MB/s</p>
+            </div>
+
+            <div class="stat-box">
+                <h3>Red - Bajada</h3>
+                <canvas id="netDownChart"></canvas>
+                <p id="netDownText">0 MB/s</p>
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="stat-box">
-        <h3>RAM</h3>
-        <canvas id="ramChart"></canvas>
-        <p id="ramText">{{ stats.ram_percent }}%</p>
-    </div>
 
-    <div class="stat-box">
-        <h3>Disco</h3>
-        <canvas id="diskChart"></canvas>
-        <p id="diskText">{{ stats.disk_percent }}%</p>
-    </div>
+    <!-- ========================= -->
+    <!-- ESTADÍSTICAS SERVIDOR -->
+    <!-- ========================= -->
+    <div class="stats-section">
 
-    <div class="stat-box">
-        <h3>Red - Subida</h3>
-        <canvas id="netUpChart"></canvas>
-        <p id="netUpText">0 MB/s</p>
-    </div>
+        <h2>Estadísticas del servidor</h2>
 
-    <div class="stat-box">
-        <h3>Red - Bajada</h3>
-        <canvas id="netDownChart"></canvas>
-        <p id="netDownText">0 MB/s</p>
-    </div>
+        <div class="system-stats">
 
-</div>
+            <div class="stat-box">
+                <h3>Usuarios</h3>
+                <p class="big-stat">{{ server_stats.total_users }}</p>
+            </div>
 
-<h2>Estadísticas del servidor</h2>
+            <div class="stat-box">
+                <h3>Canciones</h3>
+                <p class="big-stat">{{ server_stats.total_songs }}</p>
+            </div>
 
-<div class="system-stats">
+            <div class="stat-box">
+                <h3>Reproducciones</h3>
+                <p class="big-stat">{{ server_stats.total_plays }}</p>
+            </div>
 
-    <div class="stat-box">
-        <h3>Usuarios</h3>
-        <p class="big-stat">{{ server_stats.total_users }}</p>
-    </div>
+            <div class="stat-box">
+                <h3>Top canción</h3>
+                <p>
+                {% if server_stats.top_song %}
+                    {{ server_stats.top_song.title }}
+                    <br>
+                    ({{ server_stats.top_song.plays }} plays)
+                {% else %}
+                    Sin datos
+                {% endif %}
+                </p>
+            </div>
 
-    <div class="stat-box">
-        <h3>Canciones</h3>
-        <p class="big-stat">{{ server_stats.total_songs }}</p>
-    </div>
+            <div class="stat-box">
+                <h3>Top uploader</h3>
+                <p>
+                {% if server_stats.top_user %}
+                    {{ server_stats.top_user.username }}
+                    <br>
+                    ({{ server_stats.top_user.total }} canciones)
+                {% else %}
+                    Sin datos
+                {% endif %}
+                </p>
+            </div>
 
-    <div class="stat-box">
-        <h3>Reproducciones</h3>
-        <p class="big-stat">{{ server_stats.total_plays }}</p>
-    </div>
+        </div>
 
-    <div class="stat-box">
-        <h3>Top canción</h3>
-        <p>
-        {% if server_stats.top_song %}
-            {{ server_stats.top_song.title }}
-            <br>
-            ({{ server_stats.top_song.plays }} plays)
-        {% else %}
-            Sin datos
-        {% endif %}
-        </p>
-    </div>
-
-    <div class="stat-box">
-        <h3>Top uploader</h3>
-        <p>
-        {% if server_stats.top_user %}
-            {{ server_stats.top_user.username }}
-            <br>
-            ({{ server_stats.top_user.total }} canciones)
-        {% else %}
-            Sin datos
-        {% endif %}
-        </p>
     </div>
 
 </div>
