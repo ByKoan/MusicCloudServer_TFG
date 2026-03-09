@@ -41,16 +41,15 @@
 
 <a href="{{ url_for('upload.upload_file') }}" class="btn">Subir nuevas canciones</a>
 
-<h2>Lista de Canciones</h2>
-<ul>
-    {% for song in songs %}
-        <li class="song-item">
-            <span class="song-title" onclick="loadSong({{ loop.index0 }})">{{ song }}</span>
-            <div class="song-actions">
-                <button class="delete-song-btn" data-filename="{{ song }}">Borrar</button>
-            </div>
-        </li>
-    {% endfor %}
+<ul id="songList">
+{% for song in songs %}
+    <li class="song-item" data-filename="{{ song }}">
+        <span class="song-title" onclick="loadSong({{ loop.index0 }})">{{ song }}</span>
+        <div class="song-actions">
+            <button class="delete-song-btn" data-filename="{{ song }}">Borrar</button>
+        </div>
+    </li>
+{% endfor %}
 </ul>
 
 <script>

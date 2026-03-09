@@ -190,35 +190,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // BORRAR CANCIONES
+    // BORRAR CANCIONES (sin recargar)
     // ===============================
     document.querySelectorAll('.delete-song-btn').forEach(btn => {
+
         btn.addEventListener('click', async () => {
-            const filename = btn.getAttribute('data-filename');
+
+            const filename = btn.dataset.filename;
             if (!filename) return;
 
             const confirmDelete = confirm(`¿Estás seguro de que quieres borrar "${filename}"?`);
             if (!confirmDelete) return;
 
             try {
+
                 const res = await fetch('/delete_song', {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({filename})
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filename })
                 });
 
                 const data = await res.json();
+
                 if (data.success) {
-                    // Eliminar del DOM
-                    btn.parentElement.remove();
-                    alert(`"${filename}" borrada correctamente.`);
+
+                    // eliminar del DOM
+                    const songItem = btn.closest(".song-item");
+                    if (songItem) songItem.remove();
+
+                    // eliminar del array del reproductor
+                    songs = songs.filter(song => song !== filename);
+
+                    alert(`"${filename}" borrada correctamente`);
+
                 } else {
                     alert(`Error: ${data.error}`);
                 }
+
             } catch (err) {
                 alert(`Error al borrar la canción: ${err}`);
             }
+
         });
+
     });
 
     setInterval(updateServerStats, 5000)

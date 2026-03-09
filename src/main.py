@@ -5,6 +5,7 @@ from routes.auth_routes import auth_bp
 from routes.music_routes import music_bp
 from routes.upload_routes import upload_bp
 from routes.admin_routes import admin_bp
+from resources.sync_music_db import sync_music_database
 from dotenv import load_dotenv
 import os
 
@@ -17,6 +18,7 @@ def create_app():
     app.config.from_object(Config)
 
     create_user_db()
+    sync_music_database()
 
     app.secret_key = Config.SECRET_KEY or "test_12345"
 
