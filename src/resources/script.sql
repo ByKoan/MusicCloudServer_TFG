@@ -31,14 +31,16 @@ CREATE TABLE IF NOT EXISTS playlists (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     user_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(username) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS playlist_songs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     playlist_id INT,
-    song_filename VARCHAR(255),
-    FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE
+    song_id INT,
+    FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE
 );
 
 INSERT IGNORE INTO users (username, password, role)

@@ -19,24 +19,34 @@ def add_to_playlist():
     cursor = conn.cursor(dictionary=True)
     try:
         # Verificar que la playlist pertenece al usuario
-        cursor.execute("SELECT id FROM playlists WHERE id = %s AND user_id = %s",
+        cursor.execute("SELECT id FROM playlists WHERE id=%s AND user_id=%s",
                        (playlist_id, session["user_id"]))
         playlist = cursor.fetchone()
         if not playlist:
             return jsonify({"success": False, "error": "Playlist no encontrada"}), 404
 
+        cursor.execute(
+            "SELECT id FROM songs WHERE filename=%s AND uploaded_by=%s",
+            (filename, session["user_id"])
+        )
+        song = cursor.fetchone()
+        if not song:
+            return jsonify({"success": False, "error": "Canción no encontrada"}), 404
+
+        song_id = song["id"]
+
         # Verificar que la canción no esté ya en la playlist
         cursor.execute(
-            "SELECT id FROM playlist_songs WHERE playlist_id = %s AND song_filename = %s",
-            (playlist_id, filename)
+            "SELECT id FROM playlist_songs WHERE playlist_id=%s AND song_id=%s",
+            (playlist_id, song_id)
         )
         if cursor.fetchone():
             return jsonify({"success": False, "error": "La canción ya está en la playlist"}), 409
 
         # Insertar la canción en la playlist
         cursor.execute(
-            "INSERT INTO playlist_songs (playlist_id, song_filename) VALUES (%s, %s)",
-            (playlist_id, filename)
+            "INSERT INTO playlist_songs (playlist_id, song_id) VALUES (%s, %s)",
+            (playlist_id, song_id)
         )
         conn.commit()
 
