@@ -207,23 +207,34 @@ def delete_user(user_id):
 @admin_bp.route("/ban_user", methods=["POST"])
 @admin_required
 def ban_user():
+    user_id = request.form.get("user_id")
+    hours = request.form.get("hours")
 
-    username = request.form.get("username")
-    hours = int(request.form.get("hours"))
+    if not user_id or not hours:
+        flash("Datos inválidos")
+        return redirect(url_for("admin.admin_panel"))
 
-    banned_until = datetime.now() + timedelta(hours=hours)
+    try:
+        hours = int(hours)
+    except ValueError:
+        flash("Horas inválidas")
+        return redirect(url_for("admin.admin_panel"))
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "UPDATE users SET banned_until = %s WHERE username = %s",
-        (banned_until, username)
-    )
-
-    conn.commit()
-    cursor.close()
-    conn.close()
+    try:
+        cursor.execute(
+            "UPDATE users SET banned_until = DATE_ADD(NOW(), INTERVAL %s HOUR) WHERE id = %s",
+            (hours, user_id)
+        )
+        conn.commit()
+        flash(f"Usuario {user_id} baneado por {hours} horas")
+    except Exception as e:
+        flash(f"No se pudo banear al usuario: {e}")
+    finally:
+        cursor.close()
+        conn.close()
 
     return redirect(url_for("admin.admin_panel"))
 

@@ -30,8 +30,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if ('mediaSession' in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: songs[currentSongIndex],
-                artist: "Desconocido",
-                album: "MusicCloud",
+                artist: "Koan",
+                album: "MusicCloudServer",
                 artwork: [{ src: "https://via.placeholder.com/96", sizes: "96x96", type: "image/png" }]
             });
 
@@ -227,7 +227,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // CHANGE PASSWORD SINGLE BUTTON
+    // BAN INLINE
+    // ===============================
+    document.querySelectorAll(".ban").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const form = btn.closest("form");
+            const input = form.querySelector(".ban-hours-input");
+            if (!input) return;
+
+            if (input.style.display === "none") {
+                input.style.display = "inline-block";
+                input.focus();
+            } else {
+                if (input.value.trim() === "" || Number(input.value) <= 0) {
+                    alert("Introduce un número válido de horas");
+                    input.focus();
+                    return;
+                }
+                form.submit(); 
+            }
+        });
+    });
+
+    // ===============================
+    // CHANGE PASSWORD INLINE
     // ===============================
     document.addEventListener("click", (e) => {
         if (e.target.classList.contains("change-password-btn")) {
@@ -248,6 +271,33 @@ document.addEventListener("DOMContentLoaded", () => {
                 form.submit();
             }
         }
+    });
+
+    // ===============================
+    // SELECT ROLE INLINE
+    // ===============================
+
+    document.querySelectorAll(".role-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+            const form = btn.closest(".role-form");
+            const select = form.querySelector(".role-select");
+
+            if (!select.style.display || select.style.display === "none") {
+                select.style.display = "inline-block";
+                select.focus();
+            } else {
+                if (!select.value) {
+                    alert("Selecciona un rol válido");
+                    select.focus();
+                    return;
+                }
+                form.submit();
+            }
+        });
+    });
+
+    document.querySelectorAll(".role-select").forEach(select => {
+        select.addEventListener("click", e => e.stopPropagation());
     });
 
     // ===============================
@@ -331,7 +381,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // Actualización en tiempo real cada segundo
         setInterval(updateSystemStats, 1000);
     }
 

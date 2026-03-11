@@ -118,7 +118,15 @@ input[type="file"]::-webkit-file-upload-button {
     border: none;
 }
 
-/* LOGIN */
+.create-user input[type="text"],
+.create-user input[type="password"] {
+    padding: 8px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: none;
+    margin-bottom: 10px; 
+}
+
 .login-container {
     max-width: 400px;
     margin: 60px auto;
@@ -349,4 +357,8 @@ table td form {
 .change-password-btn {
     cursor: pointer;
     background-color: #1d2671;
+}
+
+.role-btn {
+    background-color: rgb(1, 187, 187);
 }

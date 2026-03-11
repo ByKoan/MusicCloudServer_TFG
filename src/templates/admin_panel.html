@@ -35,17 +35,20 @@
             required
         >
 
+        <br>
         <input
             type="password"
             name="password"
             placeholder="Contraseña"
             required
         >
+        <br>
 
         <select name="role">
             <option value="user">User</option>
             <option value="admin">Admin</option>
         </select>
+        <br>
 
         <button type="submit">Crear</button>
 
@@ -109,25 +112,9 @@
             <td>
 
                 <form action="/admin/ban_user" method="POST">
-
-                    <input
-                        type="hidden"
-                        name="username"
-                        value="{{ user.username }}"
-                    >
-
-                    <input
-                        type="number"
-                        name="hours"
-                        placeholder="Horas"
-                        min="1"
-                        style="width:70px"
-                    >
-
-                    <button class="ban">
-                        Ban
-                    </button>
-
+                    <input type="hidden" name="user_id" value="{{ user.id }}">
+                    <input type="number" name="hours" class="ban-hours-input" placeholder="Horas de ban" style="display:none; width:80px;">
+                    <button type="button" class="ban">Ban</button>
                 </form>
 
             </td>
@@ -152,24 +139,12 @@
 
             <td>
 
-                <form action="/admin/change_role/{{ user.username }}" method="POST">
-
-                    <select name="role">
-
-                        <option value="user" {% if user.role == "user" %}selected{% endif %}>
-                            User
-                        </option>
-
-                        <option value="admin" {% if user.role == "admin" %}selected{% endif %}>
-                            Admin
-                        </option>
-
+                <form method="POST" action="{{ url_for('admin.change_role', username=user.username) }}" class="role-form">
+                    <select name="role" class="role-select" style="display:none;">
+                        <option value="user" {% if user.role == 'user' %}selected{% endif %}>user</option>
+                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>admin</option>
                     </select>
-
-                    <button type="submit">
-                        Actualizar
-                    </button>
-
+                    <button type="button" class="role-btn">Actualizar</button>
                 </form>
 
             </td>
