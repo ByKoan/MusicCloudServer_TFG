@@ -14,14 +14,13 @@
          <button type="submit">Crear</button>
       </form>
       <h2>Tus playlists</h2>
-         <ul>
-         {% for playlist in playlists %}
-         <li>
-            <a href="/playlist/{{ playlist.id }}">
-               {{ playlist.name }}
-            </a>
-         </li>
-         {% endfor %}
-         </ul>
+      <ul>
+      {% for playlist in playlists %}
+      <li class="playlist-item">
+         <a href="/playlist/{{ playlist.id }}">{{ playlist.name }}</a>
+         <button class="delete-playlist-btn" data-playlist="{{ playlist.id }}">Eliminar</button>
+      </li>
+      {% endfor %}
+      </ul>
    </body>
 </html>

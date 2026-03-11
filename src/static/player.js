@@ -163,6 +163,38 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // ===============================
+    // ELIMINAR PLAYLIST
+    // ===============================
+    document.querySelectorAll(".delete-playlist-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const playlistId = btn.dataset.playlist;
+
+            if (!confirm("¿Seguro que quieres eliminar esta playlist?")) return;
+
+            try {
+                const res = await fetch("/delete_playlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ playlist_id: playlistId })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    const li = btn.closest(".playlist-item");
+                    if (li) li.remove();
+                } else {
+                    alert("Error: " + data.error);
+                }
+
+            } catch (err) {
+                alert("Error al eliminar playlist: " + err);
+            }
+        });
+    });
+
     document.addEventListener("click", () => {
         document.querySelectorAll(".playlist-select").forEach(s => s.style.display = "none");
     });
