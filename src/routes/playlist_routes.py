@@ -83,27 +83,87 @@ def view_playlist(playlist_id):
 
 @playlist_bp.route("/delete_playlist", methods=["POST"])
 def delete_playlist():
+
     if "user_id" not in session:
         return jsonify({"success": False, "error": "No logueado"})
 
     data = request.get_json()
     playlist_id = data.get("playlist_id")
+
     if not playlist_id:
         return jsonify({"success": False, "error": "ID inválido"})
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
+
     try:
-        cursor.execute("SELECT * FROM playlists WHERE id=%s AND user_id=%s", (playlist_id, session["user_id"]))
-        playlist = cursor.fetchone()
-        if not playlist:
+        cursor.execute("""
+            SELECT id FROM playlists 
+            WHERE id=%s AND user_id=%s
+        """, (playlist_id, session["user_id"]))
+
+        if not cursor.fetchone():
             return jsonify({"success": False, "error": "Playlist no encontrada"})
 
-        cursor.execute("DELETE FROM playlists WHERE id=%s", (playlist_id,))
+        cursor.execute(
+            "DELETE FROM playlist_songs WHERE playlist_id=%s",
+            (playlist_id,)
+        )
+
+        # [PERSONAL NOTE] Revisar si unicamente eliminando la playlist (por esquema de BD) se borran tb las canciones de la playlist en BD
+        cursor.execute(
+            "DELETE FROM playlists WHERE id=%s",
+            (playlist_id,)
+        )
+
         conn.commit()
+
         return jsonify({"success": True})
 
     except Exception as e:
+        conn.rollback()
+        return jsonify({"success": False, "error": str(e)})
+
+    finally:
+        cursor.close()
+        conn.close()
+
+@playlist_bp.route("/rename_playlist", methods=["POST"])
+def rename_playlist():
+    # [PERSONAL_NOTE] Arreglar que cuando tengas un nombre de playlist largo y lo quieras renombrar no se salgan los divs del div principal
+    if "user_id" not in session:
+        return jsonify({"success": False, "error": "No logueado"})
+
+    data = request.get_json()
+    playlist_id = data.get("playlist_id")
+    new_name = data.get("name")
+
+    if not playlist_id or not new_name:
+        return jsonify({"success": False, "error": "Datos inválidos"})
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            "SELECT id FROM playlists WHERE id=%s AND user_id=%s",
+            (playlist_id, session["user_id"])
+        )
+
+        if not cursor.fetchone():
+            return jsonify({"success": False, "error": "Playlist no encontrada"})
+
+        cursor.execute(
+            "UPDATE playlists SET name=%s WHERE id=%s",
+            (new_name, playlist_id)
+        )
+
+        conn.commit()
+
+        return jsonify({"success": True})
+
+    except Exception as e:
+        conn.rollback()
         return jsonify({"success": False, "error": str(e)})
 
     finally:

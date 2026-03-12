@@ -386,17 +386,22 @@ table td form {
 }
 
 
-.delete-playlist-btn {
-    background-color: #ff4c4c;  
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 0.9em;
-    transition: background 0.2s;
+.playlist-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
 }
 
-.delete-playlist-btn:hover {
-    background-color: #e43f3f;
+.playlist-actions{
+    display:flex;
+    gap:6px;
+}
+
+.rename-input{
+    padding:4px 6px;
+    font-size:0.9em;
+}
+
+.playlist-btn{
+    background-color: #ff1a1a;
 }
