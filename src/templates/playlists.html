@@ -18,7 +18,9 @@
          <li class="playlist-item" data-playlist="{{ playlist.id }}">
 
             <div class="playlist-name-wrapper">
-               <span class="playlist-name">{{ playlist.name }}</span>
+               <span class="playlist-name">
+                  <a href="{{ url_for('playlist.view_playlist', playlist_id=playlist.id) }}">{{ playlist.name }}</a>
+               </span>
             </div>
 
             <div class="playlist-actions">

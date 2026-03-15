@@ -336,64 +336,45 @@ document.addEventListener("DOMContentLoaded", () => {
     // RENOMBRAR PLAYLIST INLINE
     // ===============================
     document.querySelectorAll(".rename-playlist-btn").forEach(btn => {
-
         btn.addEventListener("click", async () => {
 
             const playlistId = btn.dataset.playlist
             const li = btn.closest(".playlist-item")
-            const nameElement = li.querySelector(".playlist-name")
             const input = li.querySelector(".rename-input")
+            const nameElement = li.querySelector(".playlist-name")
 
             if (input.style.display === "none") {
-
                 input.value = nameElement.textContent
                 input.style.display = "inline-block"
                 input.focus()
-
                 return
             }
 
             const newName = input.value.trim()
-
             if (!newName) {
                 alert("Nombre inválido")
                 return
             }
 
             try {
-
                 const res = await fetch("/rename_playlist", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        playlist_id: playlistId,
-                        name: newName
-                    })
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ playlist_id: playlistId, name: newName })
                 })
 
                 const data = await res.json()
 
                 if (data.success) {
-
-                    nameElement.textContent = newName
-                    input.style.display = "none"
-
+                    location.reload();
                 } else {
-
                     alert(data.error)
-
                 }
 
             } catch(err){
-
                 alert("Error: " + err)
-
             }
-
         })
-
     })
 
     // ===============================
@@ -479,6 +460,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
         setInterval(updateSystemStats, 1000);
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const youtubeSearchInput = document.getElementById("youtube-search-input");
+        const youtubeSearchBtn = document.getElementById("youtube-search-btn");
+        const youtubeResultsList = document.getElementById("youtube-results");
+        const youtubePlayer = document.getElementById("youtube-player");
+        const nowPlaying = document.getElementById("now-playing");
+
+        async function searchYoutube(){
+            const query = youtubeSearchInput.value.trim();
+            if(!query) return;
+
+            try {
+                const res = await fetch("/youtube_search", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ query })
+                });
+
+                const data = await res.json();
+                if(!data.success){ alert(data.error); return; }
+                showYoutubeResults(data.results);
+
+            } catch(err){ console.error(err); }
+        }
+
+        function showYoutubeResults(videos){
+            youtubeResultsList.innerHTML = "";
+            videos.forEach(video => {
+                const li = document.createElement("li");
+                li.className = "youtube-video-item";
+
+                const title = document.createElement("span");
+                title.className = "youtube-video-title";
+                title.textContent = video.title;
+
+                const playBtn = document.createElement("button");
+                playBtn.className = "youtube-play-btn";
+                playBtn.textContent = "▶";
+                playBtn.onclick = () => playYoutube(video.url, video.title);
+
+                li.appendChild(title);
+                li.appendChild(playBtn);
+                youtubeResultsList.appendChild(li);
+            });
+        }
+
+        async function playYoutube(url, title){
+            try {
+                const res = await fetch("/youtube_audio", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await res.json();
+                if(!data.success){ alert(data.error); return; }
+
+                // Adaptado a tu player principal
+                if(youtubePlayer){
+                    youtubePlayer.src = data.audio;
+                    youtubePlayer.play();
+                }
+
+                if(nowPlaying) nowPlaying.textContent = "Reproduciendo: " + title;
+
+            } catch(err){ console.error(err); }
+        }
+
+        if(youtubeSearchBtn)
+            youtubeSearchBtn.addEventListener("click", searchYoutube);
+
+        if(youtubeSearchInput)
+            youtubeSearchInput.addEventListener("keypress", e => { if(e.key === "Enter") searchYoutube(); });
+
+    });
 
     // ===============================
     // EXPOSE FUNCTIONS

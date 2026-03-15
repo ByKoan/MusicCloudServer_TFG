@@ -4,3 +4,4 @@ mysql-connector
 dotenv
 colorama
 psutil
+yt_dlp

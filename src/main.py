@@ -14,6 +14,7 @@ from routes.admin_routes import admin_bp
 from routes.playlist_routes import playlist_bp
 from routes.add_to_playlist import add_playlist_bp
 from routes.remove_from_playlist import remove_playlist_bp
+from routes.youtube_page import youtube_bp
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -35,6 +36,8 @@ def create_app():
     app.register_blueprint(playlist_bp)
     app.register_blueprint(add_playlist_bp)
     app.register_blueprint(remove_playlist_bp)
+    app.register_blueprint(youtube_bp)
+    print(app.url_map)
 
     return app
 
