@@ -163,6 +163,38 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // ===============================
+    // ELIMINAR PLAYLIST
+    // ===============================
+    document.querySelectorAll(".delete-playlist-btn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const playlistId = btn.dataset.playlist;
+
+            if (!confirm("¿Seguro que quieres eliminar esta playlist?")) return;
+
+            try {
+                const res = await fetch("/delete_playlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ playlist_id: playlistId })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    const li = btn.closest(".playlist-item");
+                    if (li) li.remove();
+                } else {
+                    alert("Error: " + data.error);
+                }
+
+            } catch (err) {
+                alert("Error al eliminar playlist: " + err);
+            }
+        });
+    });
+
     document.addEventListener("click", () => {
         document.querySelectorAll(".playlist-select").forEach(s => s.style.display = "none");
     });
@@ -299,6 +331,70 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".role-select").forEach(select => {
         select.addEventListener("click", e => e.stopPropagation());
     });
+
+    // ===============================
+    // RENOMBRAR PLAYLIST INLINE
+    // ===============================
+    document.querySelectorAll(".rename-playlist-btn").forEach(btn => {
+
+        btn.addEventListener("click", async () => {
+
+            const playlistId = btn.dataset.playlist
+            const li = btn.closest(".playlist-item")
+            const nameElement = li.querySelector(".playlist-name")
+            const input = li.querySelector(".rename-input")
+
+            if (input.style.display === "none") {
+
+                input.value = nameElement.textContent
+                input.style.display = "inline-block"
+                input.focus()
+
+                return
+            }
+
+            const newName = input.value.trim()
+
+            if (!newName) {
+                alert("Nombre inválido")
+                return
+            }
+
+            try {
+
+                const res = await fetch("/rename_playlist", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        playlist_id: playlistId,
+                        name: newName
+                    })
+                })
+
+                const data = await res.json()
+
+                if (data.success) {
+
+                    nameElement.textContent = newName
+                    input.style.display = "none"
+
+                } else {
+
+                    alert(data.error)
+
+                }
+
+            } catch(err){
+
+                alert("Error: " + err)
+
+            }
+
+        })
+
+    })
 
     // ===============================
     // SYSTEM STATS CHARTS (CPU / RAM / DISCO / RED)

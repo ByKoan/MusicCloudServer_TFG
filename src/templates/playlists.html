@@ -13,15 +13,29 @@
          <input type="text" name="name" placeholder="Nombre de la playlist" required>
          <button type="submit">Crear</button>
       </form>
-      <h2>Tus playlists</h2>
          <ul>
          {% for playlist in playlists %}
-         <li>
-            <a href="/playlist/{{ playlist.id }}">
-               {{ playlist.name }}
-            </a>
+         <li class="playlist-item" data-playlist="{{ playlist.id }}">
+
+            <div class="playlist-name-wrapper">
+               <span class="playlist-name">{{ playlist.name }}</span>
+            </div>
+
+            <div class="playlist-actions">
+               <input class="rename-input" type="text" style="display:none;">
+               <button class="playlist-btn rename-playlist-btn" data-playlist="{{ playlist.id }}">
+                  Renombrar
+               </button>
+
+               <button class="playlist-btn delete-playlist-btn" data-playlist="{{ playlist.id }}">
+                  Eliminar
+               </button>
+            </div>
+
          </li>
          {% endfor %}
          </ul>
+
+      <script src="{{ url_for('static', filename='player.js') }}"></script>
    </body>
 </html>

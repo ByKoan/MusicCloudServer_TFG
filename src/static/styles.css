@@ -362,3 +362,63 @@ table td form {
 .role-btn {
     background-color: rgb(1, 187, 187);
 }
+
+.playlist-item {
+    display: flex;
+    justify-content: space-between;  
+    align-items: center;
+    padding: 10px 12px;
+    margin: 5px 0;
+    background-color: #000;
+    border-radius: 8px;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.playlist-item:hover {
+    background-color: #333;
+}
+
+.playlist-item a {
+    color: white;
+    text-decoration: none;
+    flex-grow: 1;  
+}
+
+
+.playlist-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.playlist-actions{
+    display:flex;
+    gap:6px;
+}
+
+.rename-input{
+    padding:4px 6px;
+    font-size:0.9em;
+}
+
+.playlist-btn{
+    background-color: #ff1a1a;
+}
+
+.playlist-name-wrapper {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: thin;
+}
+
+.playlist-name {
+    display: inline-block;
+    padding-right: 10px;
+}
+
+.playlist-actions {
+    flex-shrink: 0;
+}
