@@ -405,3 +405,20 @@ table td form {
 .playlist-btn{
     background-color: #ff1a1a;
 }
+
+.playlist-name-wrapper {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: thin;
+}
+
+.playlist-name {
+    display: inline-block;
+    padding-right: 10px;
+}
+
+.playlist-actions {
+    flex-shrink: 0;
+}

@@ -17,7 +17,9 @@
          {% for playlist in playlists %}
          <li class="playlist-item" data-playlist="{{ playlist.id }}">
 
-            <span class="playlist-name">{{ playlist.name }}</span>
+            <div class="playlist-name-wrapper">
+               <span class="playlist-name">{{ playlist.name }}</span>
+            </div>
 
             <div class="playlist-actions">
                <input class="rename-input" type="text" style="display:none;">
