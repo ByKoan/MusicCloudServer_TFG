@@ -336,64 +336,45 @@ document.addEventListener("DOMContentLoaded", () => {
     // RENOMBRAR PLAYLIST INLINE
     // ===============================
     document.querySelectorAll(".rename-playlist-btn").forEach(btn => {
-
         btn.addEventListener("click", async () => {
 
             const playlistId = btn.dataset.playlist
             const li = btn.closest(".playlist-item")
-            const nameElement = li.querySelector(".playlist-name")
             const input = li.querySelector(".rename-input")
+            const nameElement = li.querySelector(".playlist-name")
 
             if (input.style.display === "none") {
-
                 input.value = nameElement.textContent
                 input.style.display = "inline-block"
                 input.focus()
-
                 return
             }
 
             const newName = input.value.trim()
-
             if (!newName) {
                 alert("Nombre inválido")
                 return
             }
 
             try {
-
                 const res = await fetch("/rename_playlist", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        playlist_id: playlistId,
-                        name: newName
-                    })
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ playlist_id: playlistId, name: newName })
                 })
 
                 const data = await res.json()
 
                 if (data.success) {
-
-                    nameElement.textContent = newName
-                    input.style.display = "none"
-
+                    location.reload();
                 } else {
-
                     alert(data.error)
-
                 }
 
             } catch(err){
-
                 alert("Error: " + err)
-
             }
-
         })
-
     })
 
     // ===============================
