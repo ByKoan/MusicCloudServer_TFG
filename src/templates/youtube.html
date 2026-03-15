@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda YouTube</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+<h1>Búsqueda de YouTube</h1>
+
+<button id="youtube-back-btn" onclick="window.location.href='/'">Volver al inicio</button>
+
+<div class="youtube-search-container">
+    <input type="text" id="youtube-search-input" placeholder="Buscar en YouTube...">
+    <button id="youtube-search-btn">Buscar</button>
+    <button id="youtube-loop-btn">Bucle: <span id="loopSongStatus">Desactivado</span></button>
+</div>
+
+<div class="youtube-player-container">
+    <audio id="youtube-player" controls></audio>
+    <p id="now-playing">Nada reproduciéndose</p>
+</div>
+
+<ul id="youtube-results" class="youtube-results-list"></ul>
+
+<ul id="songList">
+{% for song in songs %}
+    <li class="song-item" data-filename="{{ song }}">
+        <span class="song-title" onclick="loadSong({{ loop.index0 }})">{{ song }}</span>
+    </li>
+{% endfor %}
+</ul>
+
+<script src="{{ url_for('static', filename='youtube.js') }}"></script>
+</body>
+</html>
