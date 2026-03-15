@@ -25,12 +25,16 @@
 
 <ul id="youtube-results" class="youtube-results-list"></ul>
 
+<h2>Mis Canciones</h2>
 <ul id="songList">
-{% for song in songs %}
+    {% for song in songs %}
     <li class="song-item" data-filename="{{ song }}">
         <span class="song-title" onclick="loadSong({{ loop.index0 }})">{{ song }}</span>
+        <div class="song-actions">
+            <button class="download-song-btn" data-filename="{{ song }}">Descargar</button>
+        </div>
     </li>
-{% endfor %}
+    {% endfor %}
 </ul>
 
 <script src="{{ url_for('static', filename='youtube.js') }}"></script>
