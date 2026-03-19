@@ -74,14 +74,15 @@
 </ul>
 
 <script>
-let songs = {{ songs | tojson }};
-let currentSongIndex = 0;
+window.songs = {{ songs | tojson }};
+window.currentSongIndex = 0;
 
-if (songs.length > 0 && "{{ current_song }}" !== "") {
-    const idx = songs.findIndex(s => s === "{{ current_song }}");
-    if (idx !== -1) currentSongIndex = idx;
+if (window.songs.length > 0 && "{{ current_song }}" !== "") {
+    const idx = window.songs.findIndex(s => s === "{{ current_song }}");
+    if (idx !== -1) window.currentSongIndex = idx;
 }
 </script>
+
 <script src="{{ url_for('static', filename='player.js') }}"></script>
 
 </body>

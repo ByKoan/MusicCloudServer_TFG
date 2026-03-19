@@ -1,10 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // ===============================
+    // SONG ACCESS
+    // ===============================
+    function getSongs() {
+        return window.songs || [];
+    }
+
     const player = document.getElementById("player");
     const audioSource = document.getElementById("audioSource");
     const currentSongTitle = document.getElementById("currentSongTitle");
 
-    let currentSongIndex = 0;
+    let currentSongIndex = window.currentSongIndex || 0;
     let shuffle = false;
     let loop = false;
 
@@ -12,85 +19,96 @@ document.addEventListener("DOMContentLoaded", () => {
     // LOAD SONG
     // ===============================
     function loadSong(index) {
-        if (!songs || songs.length === 0) return;
+        const songs = getSongs();
+        if (!songs.length || !player || !audioSource) return;
 
-        if (index < 0) currentSongIndex = songs.length - 1;
-        else if (index >= songs.length) currentSongIndex = 0;
-        else currentSongIndex = index;
+        if (index < 0) index = songs.length - 1;
+        if (index >= songs.length) index = 0;
 
-        if (audioSource && player) {
-            audioSource.src = "/play/" + encodeURIComponent(songs[currentSongIndex]);
-            player.load();
-            player.play();
-        }
+        currentSongIndex = index;
+        const song = songs[currentSongIndex];
 
-        if (currentSongTitle) currentSongTitle.textContent = songs[currentSongIndex];
-        document.title = songs[currentSongIndex];
+        audioSource.src = "/play/" + encodeURIComponent(song);
+        player.load();
+        player.play().catch(() => {});
 
-        if ('mediaSession' in navigator) {
+        if (currentSongTitle) currentSongTitle.textContent = song;
+        document.title = song;
+
+        if ("mediaSession" in navigator) {
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: songs[currentSongIndex],
+                title: song,
                 artist: "Koan",
                 album: "MusicCloudServer",
                 artwork: [{ src: "https://via.placeholder.com/96", sizes: "96x96", type: "image/png" }]
             });
 
-            navigator.mediaSession.setActionHandler('play', () => player && player.play());
-            navigator.mediaSession.setActionHandler('pause', () => player && player.pause());
-            navigator.mediaSession.setActionHandler('previoustrack', () => handlePreviousClick());
-            navigator.mediaSession.setActionHandler('nexttrack', () => handleNextClick());
+            navigator.mediaSession.setActionHandler("play", () => player.play());
+            navigator.mediaSession.setActionHandler("pause", () => player.pause());
+            navigator.mediaSession.setActionHandler("nexttrack", handleNextClick);
+            navigator.mediaSession.setActionHandler("previoustrack", handlePreviousClick);
         }
     }
 
     // ===============================
     // CONTROLS
     // ===============================
-    function playPause() { if (player) player.paused ? player.play() : player.pause(); }
+    function playPause() {
+        if (!player) return;
+        player.paused ? player.play() : player.pause();
+    }
 
     function handleNextClick() {
-        if (!songs || songs.length === 0) return;
+        const songs = getSongs();
+        if (!songs.length) return;
 
         if (shuffle) {
-            let newIndex;
-            do { newIndex = Math.floor(Math.random() * songs.length); }
-            while (newIndex === currentSongIndex && songs.length > 1);
-            currentSongIndex = newIndex;
+            let i;
+            do {
+                i = Math.floor(Math.random() * songs.length);
+            } while (i === currentSongIndex && songs.length > 1);
+            currentSongIndex = i;
         } else {
-            currentSongIndex++;
-            if (currentSongIndex >= songs.length) currentSongIndex = 0;
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
         }
+
         loadSong(currentSongIndex);
     }
 
     function handlePreviousClick() {
-        if (!songs || songs.length === 0 || !player) return;
+        const songs = getSongs();
+        if (!songs.length || !player) return;
 
-        if (player.currentTime > 3) player.currentTime = 0;
-        else {
-            if (shuffle) {
-                let newIndex;
-                do { newIndex = Math.floor(Math.random() * songs.length); }
-                while (newIndex === currentSongIndex && songs.length > 1);
-                currentSongIndex = newIndex;
-            } else {
-                currentSongIndex--;
-                if (currentSongIndex < 0) currentSongIndex = songs.length - 1;
-            }
-            loadSong(currentSongIndex);
+        if (player.currentTime > 3) {
+            player.currentTime = 0;
+            return;
         }
+
+        if (shuffle) {
+            let i;
+            do {
+                i = Math.floor(Math.random() * songs.length);
+            } while (i === currentSongIndex && songs.length > 1);
+            currentSongIndex = i;
+        } else {
+            currentSongIndex--;
+            if (currentSongIndex < 0) currentSongIndex = songs.length - 1;
+        }
+
+        loadSong(currentSongIndex);
     }
 
     function toggleShuffle() {
         shuffle = !shuffle;
-        const elem = document.getElementById("shuffleStatus");
-        if (elem) elem.textContent = shuffle ? "Activado" : "Desactivado";
+        const el = document.getElementById("shuffleStatus");
+        if (el) el.textContent = shuffle ? "Activado" : "Desactivado";
     }
 
     function toggleLoop() {
         loop = !loop;
         if (player) player.loop = loop;
-        const elem = document.getElementById("loopStatus");
-        if (elem) elem.textContent = loop ? "Activado" : "Desactivado";
+        const el = document.getElementById("loopStatus");
+        if (el) el.textContent = loop ? "Activado" : "Desactivado";
     }
 
     // ===============================
@@ -102,17 +120,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const resetSearch = document.getElementById("resetSearch");
 
     if (searchForm && searchInput && songList) {
-        searchForm.addEventListener("submit", (e) => {
+        searchForm.addEventListener("submit", e => {
             e.preventDefault();
             const query = searchInput.value.toLowerCase();
             const items = songList.querySelectorAll(".song-item");
             items.forEach(item => {
-                const titleEl = item.querySelector(".song-title");
-                const title = titleEl ? titleEl.textContent.toLowerCase() : "";
+                const title = item.querySelector(".song-title")?.textContent.toLowerCase() || "";
                 item.style.display = title.includes(query) ? "" : "none";
             });
             const firstVisible = songList.querySelector(".song-item:not([style*='display: none']) .song-title");
-            if (firstVisible) playSongByName(firstVisible.textContent);
+            if (firstVisible) window.playSongByName(firstVisible.textContent);
         });
     }
 
@@ -124,14 +141,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===============================
-    // PLAYLIST ADD/REMOVE
+    // PLAYLIST ADD
     // ===============================
     document.querySelectorAll(".add-to-playlist").forEach(container => {
         const addBtn = container.querySelector(".add-btn");
         const select = container.querySelector(".playlist-select");
         if (!addBtn || !select) return;
 
-        addBtn.addEventListener("click", (e) => {
+        addBtn.addEventListener("click", e => {
             e.stopPropagation();
             const isOpen = select.style.display === "inline-block";
             document.querySelectorAll(".playlist-select").forEach(s => s.style.display = "none");
@@ -144,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const playlistId = select.value;
             if (!playlistId) return;
             const songItem = container.closest(".song-item");
-            const filename = songItem ? songItem.dataset.filename : null;
+            const filename = songItem?.dataset.filename;
             if (!filename) return;
 
             try {
@@ -154,44 +171,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     body: JSON.stringify({ filename, playlist_id: playlistId })
                 });
                 const data = await res.json();
-                if (data.success) alert(`"${filename}" añadida a la playlist`);
-                else alert(`Error: ${data.error}`);
-            } catch (err) { alert("Error al añadir la canción: " + err); }
+                alert(data.success ? `"${filename}" añadida a la playlist` : `Error: ${data.error}`);
+            } catch (err) {
+                alert("Error al añadir la canción: " + err);
+            }
 
             select.style.display = "none";
             select.selectedIndex = 0;
-        });
-    });
-
-    // ===============================
-    // ELIMINAR PLAYLIST
-    // ===============================
-    document.querySelectorAll(".delete-playlist-btn").forEach(btn => {
-        btn.addEventListener("click", async (e) => {
-            e.preventDefault();
-            const playlistId = btn.dataset.playlist;
-
-            if (!confirm("¿Seguro que quieres eliminar esta playlist?")) return;
-
-            try {
-                const res = await fetch("/delete_playlist", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ playlist_id: playlistId })
-                });
-
-                const data = await res.json();
-
-                if (data.success) {
-                    const li = btn.closest(".playlist-item");
-                    if (li) li.remove();
-                } else {
-                    alert("Error: " + data.error);
-                }
-
-            } catch (err) {
-                alert("Error al eliminar playlist: " + err);
-            }
         });
     });
 
@@ -199,41 +185,17 @@ document.addEventListener("DOMContentLoaded", () => {
         document.querySelectorAll(".playlist-select").forEach(s => s.style.display = "none");
     });
 
-    document.querySelectorAll(".remove-from-playlist").forEach(btn => {
-        btn.addEventListener("click", async () => {
-            const filename = btn.dataset.filename;
-            const playlistId = btn.dataset.playlist;
-            if(!confirm(`Quitar "${filename}" de la playlist?`)) return;
-
-            try {
-                const res = await fetch("/remove_from_playlist", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ filename, playlist_id: playlistId })
-                });
-                const data = await res.json();
-                if(data.success){
-                    const songItem = btn.closest(".song-item");
-                    if(songItem) songItem.remove();
-                    location.reload();
-                } else alert(data.error);
-            } catch(err){ alert("Error: " + err); }
-        });
-    });
-
     // ===============================
-    // DELETE SONGS FROM INDEX
+    // DELETE SONG
     // ===============================
     if (songList) {
-        songList.addEventListener("click", async (e) => {
+        songList.addEventListener("click", async e => {
             if (!e.target.classList.contains("delete-song-btn")) return;
-
             const btn = e.target;
             const filename = btn.dataset.filename;
             if (!filename) return;
 
-            const confirmDelete = confirm(`¿Estás seguro de que quieres borrar "${filename}"?`);
-            if (!confirmDelete) return;
+            if (!confirm(`¿Borrar "${filename}"?`)) return;
 
             try {
                 const res = await fetch("/delete_song", {
@@ -241,13 +203,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ filename })
                 });
-
                 const data = await res.json();
-
                 if (data.success) {
-                    const songItem = btn.closest(".song-item");
-                    if (songItem) songItem.remove();
-                    songs = songs.filter(s => s !== filename);
+                    btn.closest(".song-item")?.remove();
+                    window.songs = getSongs().filter(s => s !== filename);
                     alert(`"${filename}" borrada correctamente`);
                 } else {
                     alert(`Error: ${data.error}`);
@@ -262,21 +221,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // BAN INLINE
     // ===============================
     document.querySelectorAll(".ban").forEach(btn => {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("click", () => {
             const form = btn.closest("form");
-            const input = form.querySelector(".ban-hours-input");
+            const input = form?.querySelector(".ban-hours-input");
             if (!input) return;
 
             if (input.style.display === "none") {
                 input.style.display = "inline-block";
                 input.focus();
             } else {
-                if (input.value.trim() === "" || Number(input.value) <= 0) {
+                if (!input.value || Number(input.value) <= 0) {
                     alert("Introduce un número válido de horas");
                     input.focus();
                     return;
                 }
-                form.submit(); 
+                form.submit();
             }
         });
     });
@@ -284,35 +243,33 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===============================
     // CHANGE PASSWORD INLINE
     // ===============================
-    document.addEventListener("click", (e) => {
-        if (e.target.classList.contains("change-password-btn")) {
-            const form = e.target.closest("form");
-            if (!form) return;
-            const input = form.querySelector(".password-input");
-            if (!input) return;
+    document.addEventListener("click", e => {
+        if (!e.target.classList.contains("change-password-btn")) return;
+        const form = e.target.closest("form");
+        const input = form?.querySelector(".password-input");
+        if (!input) return;
 
-            if (!input.style.display || input.style.display === "none") {
-                input.style.display = "inline-block";
+        if (!input.style.display || input.style.display === "none") {
+            input.style.display = "inline-block";
+            input.focus();
+        } else {
+            if (!input.value.trim()) {
+                alert("Introduce una contraseña válida");
                 input.focus();
-            } else {
-                if(input.value.trim() === "") {
-                    alert("Introduce una contraseña válida");
-                    input.focus();
-                    return;
-                }
-                form.submit();
+                return;
             }
+            form.submit();
         }
     });
 
     // ===============================
     // SELECT ROLE INLINE
     // ===============================
-
     document.querySelectorAll(".role-btn").forEach(btn => {
-        btn.addEventListener("click", e => {
+        btn.addEventListener("click", () => {
             const form = btn.closest(".role-form");
-            const select = form.querySelector(".role-select");
+            const select = form?.querySelector(".role-select");
+            if (!select) return;
 
             if (!select.style.display || select.style.display === "none") {
                 select.style.display = "inline-block";
@@ -337,23 +294,23 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===============================
     document.querySelectorAll(".rename-playlist-btn").forEach(btn => {
         btn.addEventListener("click", async () => {
-
-            const playlistId = btn.dataset.playlist
-            const li = btn.closest(".playlist-item")
-            const input = li.querySelector(".rename-input")
-            const nameElement = li.querySelector(".playlist-name")
+            const li = btn.closest(".playlist-item");
+            const input = li?.querySelector(".rename-input");
+            const nameEl = li?.querySelector(".playlist-name");
+            const playlistId = btn.dataset.playlist;
+            if (!input || !nameEl) return;
 
             if (input.style.display === "none") {
-                input.value = nameElement.textContent
-                input.style.display = "inline-block"
-                input.focus()
-                return
+                input.value = nameEl.textContent;
+                input.style.display = "inline-block";
+                input.focus();
+                return;
             }
 
-            const newName = input.value.trim()
+            const newName = input.value.trim();
             if (!newName) {
-                alert("Nombre inválido")
-                return
+                alert("Nombre inválido");
+                return;
             }
 
             try {
@@ -361,43 +318,25 @@ document.addEventListener("DOMContentLoaded", () => {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ playlist_id: playlistId, name: newName })
-                })
-
-                const data = await res.json()
-
-                if (data.success) {
-                    location.reload();
-                } else {
-                    alert(data.error)
-                }
-
-            } catch(err){
-                alert("Error: " + err)
+                });
+                const data = await res.json();
+                if (data.success) location.reload();
+                else alert(data.error);
+            } catch (err) {
+                alert("Error: " + err);
             }
-        })
-    })
+        });
+    });
 
     // ===============================
-    // SYSTEM STATS CHARTS (CPU / RAM / DISCO / RED)
+    // SYSTEM STATS CHARTS
     // ===============================
     if (window.systemStats) {
-
-        function createChart(id, value, color) {
-            return new Chart(document.getElementById(id), {
-                type: "doughnut",
-                data: {
-                    datasets: [{
-                        data: [value, 100 - value],
-                        backgroundColor: [color, "#333"]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
+        const createChart = (id, value, color) => new Chart(document.getElementById(id), {
+            type: "doughnut",
+            data: { datasets: [{ data: [value, 100 - value], backgroundColor: [color, "#333"] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
 
         const cpuChart = createChart("cpuChart", window.systemStats.cpu, "#ff6384");
         const ramChart = createChart("ramChart", window.systemStats.ram_percent, "#36a2eb");
@@ -405,36 +344,31 @@ document.addEventListener("DOMContentLoaded", () => {
         const netUpChart = createChart("netUpChart", 0, "#4bc0c0");
         const netDownChart = createChart("netDownChart", 0, "#ff9f40");
 
-        const netUpText = document.getElementById("netUpText");
-        const netDownText = document.getElementById("netDownText");
-
         let lastSent = window.systemStats.net_sent;
         let lastRecv = window.systemStats.net_recv;
+
+        const netUpText = document.getElementById("netUpText");
+        const netDownText = document.getElementById("netDownText");
 
         async function updateSystemStats() {
             try {
                 const res = await fetch("/admin/system_stats");
                 const data = await res.json();
 
-                // CPU
                 cpuChart.data.datasets[0].data[0] = data.cpu;
                 cpuChart.data.datasets[0].data[1] = 100 - data.cpu;
                 cpuChart.update();
 
-                // RAM
                 ramChart.data.datasets[0].data[0] = data.ram_percent;
                 ramChart.data.datasets[0].data[1] = 100 - data.ram_percent;
                 ramChart.update();
 
-                // DISCO
                 diskChart.data.datasets[0].data[0] = data.disk_percent;
                 diskChart.data.datasets[0].data[1] = 100 - data.disk_percent;
                 diskChart.update();
 
-                // RED
                 const upload = ((data.net_sent - lastSent) / 1024 / 1024).toFixed(2);
                 const download = ((data.net_recv - lastRecv) / 1024 / 1024).toFixed(2);
-
                 lastSent = data.net_sent;
                 lastRecv = data.net_recv;
 
@@ -453,100 +387,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (document.getElementById("ramText")) document.getElementById("ramText").textContent = `${data.ram_used} / ${data.ram_total} GB (${data.ram_percent}%)`;
                 if (document.getElementById("diskText")) document.getElementById("diskText").textContent = `${data.disk_used} / ${data.disk_total} GB (${data.disk_percent}%)`;
 
-            } catch (err) {
-                console.error("Error al actualizar stats:", err);
-            }
+            } catch (err) { console.error("Error al actualizar stats:", err); }
         }
 
         setInterval(updateSystemStats, 1000);
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-
-        const youtubeSearchInput = document.getElementById("youtube-search-input");
-        const youtubeSearchBtn = document.getElementById("youtube-search-btn");
-        const youtubeResultsList = document.getElementById("youtube-results");
-        const youtubePlayer = document.getElementById("youtube-player");
-        const nowPlaying = document.getElementById("now-playing");
-
-        async function searchYoutube(){
-            const query = youtubeSearchInput.value.trim();
-            if(!query) return;
-
-            try {
-                const res = await fetch("/youtube_search", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ query })
-                });
-
-                const data = await res.json();
-                if(!data.success){ alert(data.error); return; }
-                showYoutubeResults(data.results);
-
-            } catch(err){ console.error(err); }
-        }
-
-        function showYoutubeResults(videos){
-            youtubeResultsList.innerHTML = "";
-            videos.forEach(video => {
-                const li = document.createElement("li");
-                li.className = "youtube-video-item";
-
-                const title = document.createElement("span");
-                title.className = "youtube-video-title";
-                title.textContent = video.title;
-
-                const playBtn = document.createElement("button");
-                playBtn.className = "youtube-play-btn";
-                playBtn.textContent = "▶";
-                playBtn.onclick = () => playYoutube(video.url, video.title);
-
-                li.appendChild(title);
-                li.appendChild(playBtn);
-                youtubeResultsList.appendChild(li);
-            });
-        }
-
-        async function playYoutube(url, title){
-            try {
-                const res = await fetch("/youtube_audio", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ url })
-                });
-
-                const data = await res.json();
-                if(!data.success){ alert(data.error); return; }
-
-                // Adaptado a tu player principal
-                if(youtubePlayer){
-                    youtubePlayer.src = data.audio;
-                    youtubePlayer.play();
-                }
-
-                if(nowPlaying) nowPlaying.textContent = "Reproduciendo: " + title;
-
-            } catch(err){ console.error(err); }
-        }
-
-        if(youtubeSearchBtn)
-            youtubeSearchBtn.addEventListener("click", searchYoutube);
-
-        if(youtubeSearchInput)
-            youtubeSearchInput.addEventListener("keypress", e => { if(e.key === "Enter") searchYoutube(); });
-
-    });
-
     // ===============================
-    // EXPOSE FUNCTIONS
+    // EXPORT FUNCTIONS
     // ===============================
-    window.playSongByName = function(name) {
-        if (!songs) return;
-        const index = songs.findIndex(s => s.toLowerCase() === name.toLowerCase());
-        if (index !== -1) loadSong(index);
-    };
-
     window.loadSong = loadSong;
     window.playPause = playPause;
     window.handleNextClick = handleNextClick;
@@ -554,15 +403,14 @@ document.addEventListener("DOMContentLoaded", () => {
     window.toggleShuffle = toggleShuffle;
     window.toggleLoop = toggleLoop;
 
-    if (player) {
-        player.addEventListener("ended", () => {
-            if (loop) loadSong(currentSongIndex);
-            else handleNextClick();
-        });
-    }
+    window.playSongByName = name => {
+        const index = getSongs().findIndex(s => s.toLowerCase() === name.toLowerCase());
+        if (index !== -1) loadSong(index);
+    };
 
-    if (player && songs && songs.length > 0) loadSong(0);
-
-    setInterval(updateServerStats, 5000);
+    // ===============================
+    // INITIAL LOAD
+    // ===============================
+    if (player && getSongs().length > 0) loadSong(currentSongIndex);
 
 });

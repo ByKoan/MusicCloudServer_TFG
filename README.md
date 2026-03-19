@@ -47,8 +47,126 @@
 
 - In Linux you will need to setup your own MySQL server, when you setup the server configure the variables in .env with your user and password. You will need to change the music folder with the path you will put the local music files too
 
-### To use the project:
+## Project Structure:
 
-- This project actually is only web service (You can use in the machine it local running searching localhost:8080 or in your local network searching <vm_ip>:8080). In subsequent versions i will add a Desktop and mobile Application to connect to the server for a better use (A machine will need to host the server to centralize the use of resources). 
+- ***All the code is finded on `src` root***
 
-- The project automatically manage the Database creating a first admin user (It is created in the script.sql file in `/src/resources` which is automatically loaded every first run of the project). The user is `'koan'`, password `'koan'` that this user can access to the admin panel and create more users and manage them, so that everything related to the database can be managed from within the project itself without you having to write any more code manually.
+### `main.py`:
+
+- This class is the main class of the project, it create the `Flask` app, create the **DB**, sincronyze the local music with the **DB** and register all the *Blueprints* of the routes. (For debugging print all routes after the start of the app)
+- It runs on `http://<vm_ip>:8080`. Recommend to usea a private VPN to access to the service everywhere you are 
+
+### `config.py`:
+
+- This class is the main config class for the app. It contains the following variables:
+	- `secret_key` - Secret key for `flask` app
+	- `db_user` - db user
+	- `db_password` - db password
+	- `db_name` - db name
+	- `db_host` - db host
+	- `base_music_folder` - root where users folder will be created
+	- `allowed_extensions` - allowed extensions for audio files
+
+### `.env`:
+
+- Environment variables file
+### `/utils`:
+
+- Here will be some utilities used in the project
+#### `/utils/file_utils.py`:
+
+- This is a function that will check if the file extension is valid on `allowed_extensions`
+
+### `/templates`:
+
+- Here will be the `html` files of the routes
+#### `login.html`: 
+- Login panel
+#### `index.html`:
+- Root panel (Show the local songs view)
+#### `admin_panel.html`:
+- Show the admin panel (You need privilegies with the user rol)
+#### `playlists`:
+- Page to create playlists
+#### `playlist_view.html`:
+- Show the songs of the playlist indicated
+#### `upload.html`:
+- Page to upload songs file to local audio files
+#### `youtube.html`:
+- Page to play songs from youtube and download it
+### `/static`:
+
+- Root with the styles and javascript files
+#### `styles.css`:
+- styles for the html pages
+#### `player.js`:
+- main javascript file for the project (need to refactor separating the code)
+#### `youtube.js`:
+- javascript file for handling the youtube functions
+### `/services`:
+
+- Here will be located service to handle some data with the db
+#### `music_service.py`:
+- Obtains the user folder and the user songs
+#### `auth_service.py`:
+- Validate the the user to the db
+### `/routes`:
+
+- Here will be located all the python files of the routes
+
+#### `/routes/auth_routes.py`:
+- This route is used to make the login **POST**, it obtains the `username` and the `password` from the `html` inputs and validate if the user is banned, if the user is banned, shows a log on the login `div` that say the time the user is banned, if not it will try to validate the credentials to the db. If it get succes, redirect to `index` if not reload the login. This file contains to the `/logout` route
+#### `/routes/music_routes.py`:
+- `music_routes` is the file that contains the routes that is used on the index of the server. It contains the following routes:
+
+	- `"/"` index route that shows the index of the server. it validates if the user is logged if not redirect to `login.html`. It shows all the user songs and all other items 
+
+	- `"/play/<filename>"` route to play a song from the local files, it validates if the user is logged if not redirect to `login.html`. At same time update the server stats while playing the song. If try to play a song that does not exist it will throw an `404 error`
+
+	- `"/delete_song"` route to delete songs from local files. it validates if the user is logged if not redirect to `login.html`. if the file does not exist throw an `400 error`, if exist try to delete it from `DB` and `local`, if it doesn't exist in either of the two places throw an `500 error`
+#### `/routes/upload_routes`:
+- This route will be used only to upload songs to play them on local. It validates if the user is logged, if not, redirect to `login.html`. It makes a **POST** request with the file and upload it to local files and the name of the song to the **DB**, also update server stats when upload songs.
+- It validates.
+	- If the file does not exists
+	- If not files selected 
+	- If is not an allowed file
+
+#### `/routes/admin_routes.py`:
+- This file is dedicated only to **admin routes**, you will need admin perms.
+- This file have the following routes:
+
+	- `"/"`: Main route of the admin routes, it will show up the `html` of the page showing all sections. Contains methods **GET** and **POST**. This route let you create users, search them, show the system stats
+
+	- `"/change_role/<username>"`: Route dedicated to change the role of a user. Contains method **POST**
+
+	- `"/delete/<username>"`: Route dedicated to delete users. Contains method **POST**
+
+	- `"/ban_user"`: Route dedicated to ban users. Contains method **POST**
+
+	- `"/unban_user"`: Route dedicated to unban users. Contains method **POST**
+
+	- `"/change_password/<username>"`: Route dedicated to change the password of the users. Contains methos **POST**
+
+	- `"/system_stats"`: Route dedicated to get the system stats
+
+#### `/routes/playlist_routes`:
+- This file is dedicated only to **playlist routes** (*All playlist system is managed from DB*)
+- This file have the following routes:
+
+	- `"/playlists"`: Check if user is logged, if not redirect to `login.html`. Obtain and shows all playlist from database
+
+	- `"/create_playlist"`: Check if user is logged, if not redirect to `login.html`. Contains method **POST**, creates the playlist in database
+
+	- `"/playlist/<int:playlist_id>"`: Check if user is logged, if not redirect to `login.html`. Access to the playlist clicked/selected
+
+	- `"/delete_playlist"`: Check if user is logged, if not redirect to `login.html`. Contains method **POST**, delete the playlist and the songs it have asigned (not the local files and the record in table songs) of the database
+
+	- `"/rename_playlist"`: Check if user is logged, if not redirect to `login.html`. Contains method **POST**, rename the playlist from database
+
+#### `/routes/add_to_playlist.py`:
+
+#### `/routes/remove_from_playlist`:
+
+#### `routes/youtube_page.py`:
+
+

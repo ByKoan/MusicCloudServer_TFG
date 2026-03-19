@@ -1,167 +1,185 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    const youtubeSearchInput = document.getElementById("youtube-search-input");
-    const youtubeSearchBtn = document.getElementById("youtube-search-btn");
-    const youtubeResultsList = document.getElementById("youtube-results");
-    const youtubePlayer = document.getElementById("youtube-player");
+    const input = document.getElementById("youtube-search-input");
+    const btn = document.getElementById("youtube-search-btn");
+    const results = document.getElementById("youtube-results");
+    const player = document.getElementById("youtube-player");
     const nowPlaying = document.getElementById("now-playing");
+
     const loopBtn = document.getElementById("youtube-loop-btn");
-    const loopStatusElem = document.getElementById("loopSongStatus");
+    const loopStatus = document.getElementById("loopSongStatus");
+
     const songList = document.getElementById("songList");
 
     let loopSong = false;
 
     // ===============================
-    // LOOP CONTROL
+    // LOOP
     // ===============================
-    function toggleLoopSong() {
+    function toggleLoop() {
         loopSong = !loopSong;
-        if (youtubePlayer) youtubePlayer.loop = loopSong;
-        if (loopStatusElem) loopStatusElem.textContent = loopSong ? "Activado" : "Desactivado";
+        if (loopStatus)
+            loopStatus.textContent = loopSong ? "Activado" : "Desactivado";
     }
 
-    if(loopBtn) loopBtn.addEventListener("click", toggleLoopSong);
+    if (loopBtn) loopBtn.addEventListener("click", toggleLoop);
 
-    if (youtubePlayer) {
-        youtubePlayer.addEventListener("ended", () => {
-            if(loopSong) {
-                youtubePlayer.currentTime = 0;
-                youtubePlayer.play();
+    if (player) {
+        player.addEventListener("ended", () => {
+            if (loopSong) {
+                player.currentTime = 0;
+                player.play();
             }
         });
     }
 
     // ===============================
-    // YOUTUBE SEARCH
+    // SEARCH
     // ===============================
     async function searchYoutube() {
-        const query = youtubeSearchInput.value.trim();
-        if(!query) return;
 
-        try {
-            const res = await fetch("/youtube_search", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ query })
-            });
+        const query = input.value.trim();
+        if (!query) return;
 
-            const data = await res.json();
-            if(!data.success){ 
-                alert(data.error); 
-                return; 
-            }
+        const res = await fetch("/youtube_search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query })
+        });
 
-            showYoutubeResults(data.results);
+        const data = await res.json();
 
-        } catch(err) {
-            console.error(err);
-            alert("Error al buscar en YouTube: " + err);
+        if (!data.success) {
+            alert(data.error);
+            return;
         }
+
+        showResults(data.results);
     }
 
-    function showYoutubeResults(videos){
-        youtubeResultsList.innerHTML = "";
+    // ===============================
+    // SHOW RESULTS
+    // ===============================
+    function showResults(videos) {
+
+        results.innerHTML = "";
 
         videos.forEach(video => {
+
             const li = document.createElement("li");
             li.className = "youtube-video-item";
 
             const title = document.createElement("span");
-            title.className = "youtube-video-title";
             title.textContent = video.title;
 
             const playBtn = document.createElement("button");
-            playBtn.className = "youtube-play-btn";
             playBtn.textContent = "▶";
             playBtn.onclick = () => playYoutube(video.url, video.title);
 
             const downloadBtn = document.createElement("button");
-            downloadBtn.className = "youtube-download-btn";
             downloadBtn.textContent = "⬇ Descargar";
-            downloadBtn.onclick = async () => {
-                try {
-                    const res = await fetch("/youtube_download", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ url: video.url })
-                    });
-                    const data = await res.json();
-                    if(!data.success){
-                        alert("Error: " + data.error);
-                        return;
-                    }
+            downloadBtn.onclick = () => downloadYoutube(video);
 
-                    alert(`"${data.filename}" descargada correctamente`);
-
-                    // Agregar a la lista de canciones en la UI
-                    const liSong = document.createElement("li");
-                    liSong.className = "song-item";
-                    liSong.dataset.filename = data.filename;
-                    liSong.innerHTML = `
-                        <span class="song-title" onclick="loadSong(${songs.length})">${data.filename}</span>
-                        <div class="song-actions">
-                            <button class="download-song-btn" data-filename="${data.filename}">Descargar</button>
-                        </div>
-                    `;
-                    if (songList) songList.appendChild(liSong);
-                    songs.push(data.filename);
-
-                    // Guardar en la base de datos vía backend
-                    await fetch("/add_song_to_db", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ filename: data.filename, title: video.title })
-                    });
-
-                } catch(err){
-                    alert("Error al descargar: " + err);
-                }
-            };
-
-            li.appendChild(title);
-            li.appendChild(playBtn);
-            li.appendChild(downloadBtn);
-            youtubeResultsList.appendChild(li);
+            li.append(title, playBtn, downloadBtn);
+            results.appendChild(li);
         });
     }
 
     // ===============================
     // PLAY YOUTUBE AUDIO
     // ===============================
-    async function playYoutube(url, title){
-        try {
-            const res = await fetch("/youtube_audio", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url })
-            });
+    async function playYoutube(url, title) {
 
-            const data = await res.json();
-            if(!data.success){ 
-                alert(data.error); 
-                return; 
-            }
+        const res = await fetch("/youtube_audio", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url })
+        });
 
-            if(youtubePlayer){
-                youtubePlayer.src = data.audio;
-                youtubePlayer.play();
-            }
+        const data = await res.json();
 
-            if(nowPlaying) nowPlaying.textContent = "Reproduciendo: " + title;
-
-        } catch(err){
-            console.error(err);
-            alert("Error al reproducir: " + err);
+        if (!data.success) {
+            alert(data.error);
+            return;
         }
+
+        player.src = data.audio;
+        player.play();
+
+        if (nowPlaying)
+            nowPlaying.textContent = "Reproduciendo: " + title;
     }
 
     // ===============================
-    // EVENT LISTENERS
+    // DOWNLOAD + AUTO ADD
     // ===============================
-    if(youtubeSearchBtn) 
-        youtubeSearchBtn.addEventListener("click", searchYoutube);
+    async function downloadYoutube(video) {
 
-    if(youtubeSearchInput) 
-        youtubeSearchInput.addEventListener("keypress", e => { if(e.key === "Enter") searchYoutube(); });
+        const res = await fetch("/youtube_download", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: video.url })
+        });
+
+        const data = await res.json();
+
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+
+        alert(`"${data.filename}" descargada`);
+
+        // asegurar array global
+        if (!window.songs) window.songs = [];
+
+        const newIndex = window.songs.length;
+        window.songs.push(data.filename);
+
+        // añadir a UI
+        if (songList) {
+
+            const li = document.createElement("li");
+            li.className = "song-item";
+            li.dataset.filename = data.filename;
+
+            li.innerHTML = `
+                <span class="song-title">${data.filename}</span>
+            `;
+
+            li.querySelector(".song-title")
+                .addEventListener("click", () => {
+                    if (window.loadSong)
+                        window.loadSong(newIndex);
+                });
+
+            songList.appendChild(li);
+        }
+
+        // guardar en DB
+        await fetch("/add_song_to_db", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                filename: data.filename,
+                title: video.title
+            })
+        });
+
+        // AUTO PLAY 🔥
+        if (window.loadSong)
+            window.loadSong(newIndex);
+    }
+
+    // ===============================
+    // EVENTS
+    // ===============================
+    if (btn) btn.addEventListener("click", searchYoutube);
+
+    if (input) {
+        input.addEventListener("keypress", e => {
+            if (e.key === "Enter") searchYoutube();
+        });
+    }
 
 });
