@@ -19,14 +19,14 @@
 
 - Future implementations that will be made:
     - ~~user role management (database protection)~~
-    - user stats (Database)
+    - ~~user stats (Database)~~
     - ~~server stats (System usage) (Operative Systems) - Will be used to check minimum requirements to run the project~~
     - ~~local playlists (Database)~~
-    - desktop application (App)
-    - mobile application (App)
-    - route to play audio/videos from youtube (Web/App)
+    - ~~route to play audio/videos from youtube (Web/App)~~
     - funcionality that allow to download audio from youtube automatically 
     - importing youtube playlists
+    -  desktop application (App)
+    - mobile application (App)
 
 ## Use and desplegation of the project:
 
@@ -164,9 +164,32 @@
 	- `"/rename_playlist"`: Check if user is logged, if not redirect to `login.html`. Contains method **POST**, rename the playlist from database
 
 #### `/routes/add_to_playlist.py`:
+- This file is dedicates to manage the route that is dedicate to add local songs to playlist:
+	- `/add_to_playlist` Contains method **POST**. Check if user is logged, if not redirect to Login. Check if the `filename` or the `playlist_id` are not setted, if not send an **400 ERROR**  . Update the db adding the song to the `playlist_songs` table. If the song dont exist on the db or exists already in the playlist it will send an **404 ERROR** or **409 ERROR** 
 
 #### `/routes/remove_from_playlist`:
+- This file is dedicated to manage the route that is dedicated to remove local songs from the playlist:
+	- `/remove_from_playlist`: Contains method **POST**. Check if user is logged, if not redirect to login. Check if the `filename` or the `playlist_id` are not setted, if not send an **400 ERROR** . Check if the user is the owner of the playlist, if not send an **404 ERROR**, check if the song dont exists on the playlist, if not send an **404 ERROR**. Update table `playlist_songs` deleting the song
 
 #### `routes/youtube_page.py`:
+- This file contains some routes asociated to youtube funcionalities: (**TO DO**)
+	- `/youtube_page`:
 
+	 - `/youtube_search`:
 
+	- `/youtube_audio`:
+
+	- `/youtube_download`:
+
+### `/resources`:
+
+#### `manage_database_script.py`:
+- Script dedicated to manage the DB in cli manually.
+#### `script.sql`:
+- Script with the DB schema to create it. It contains a record with the firt user (admin) `koan:koan`
+#### `sync_music_db.py`:
+- Script to sync the local song files with the DB records
+### `/db`:
+#### `db.py`:
+
+- Script that allow the project to manage the DB and get the info

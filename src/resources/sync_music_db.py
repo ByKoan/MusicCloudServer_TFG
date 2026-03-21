@@ -33,6 +33,12 @@ def sync_music_database():
         if not os.path.isdir(user_folder):
             continue
 
+        # Comprobar que el usuario existe en la BD
+        cursor.execute("SELECT 1 FROM users WHERE username = %s", (username,))
+        if cursor.fetchone() is None:
+            print(f"[WARN] Usuario '{username}' no encontrado en la BD. Se omitirán sus canciones.")
+            continue 
+
         for filename in os.listdir(user_folder):
 
             if not allowed_file(filename):
@@ -41,7 +47,6 @@ def sync_music_database():
             disk_songs.add((username, filename))
 
             if (username, filename) not in db_songs:
-
                 cursor.execute(
                     """
                     INSERT INTO songs (title, filename, uploaded_by)
@@ -49,7 +54,6 @@ def sync_music_database():
                     """,
                     (filename, filename, username)
                 )
-
                 added_count += 1
 
     # =========================
@@ -58,12 +62,10 @@ def sync_music_database():
     for username, filename in db_songs:
 
         if (username, filename) not in disk_songs:
-
             cursor.execute(
                 "DELETE FROM songs WHERE filename=%s AND uploaded_by=%s",
                 (filename, username)
             )
-
             removed_count += 1
 
     # =========================
@@ -79,7 +81,6 @@ def sync_music_database():
     """)
 
     conn.commit()
-
     cursor.close()
     conn.close()
 

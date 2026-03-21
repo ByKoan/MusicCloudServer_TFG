@@ -12,6 +12,6 @@ RUN apt-get update && \
 
 COPY src/ .  
 
-EXPOSE 8080
+EXPOSE 8080 50000
 
 CMD ["python", "main.py"]  

@@ -9,12 +9,10 @@ auth_bp = Blueprint("auth", __name__)
 def login():
 
     if request.method == 'POST':
-
         username = request.form.get('username', '').strip().lower()
         password = request.form.get('password', '').strip()
 
         if validate_user(username, password):
-
             banned_until = get_user_ban(username)
 
             if banned_until and banned_until > datetime.now():
@@ -23,6 +21,7 @@ def login():
                     error=f"Usuario baneado hasta {banned_until}"
                 )
 
+            session['username'] = username
             session['user_id'] = username
             session['role'] = get_user_role(username)
 
@@ -35,8 +34,7 @@ def login():
 
 @auth_bp.route('/logout')
 def logout():
-
     session.pop('user_id', None)
-    session.pop('username', None) 
+    session.pop('username', None)
     session.pop('role', None)
     return redirect(url_for('auth.login'))
