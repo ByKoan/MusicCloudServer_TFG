@@ -300,7 +300,7 @@ def import_youtube_playlist():
 
     except Exception as e:
         conn.rollback()
-        current_app.logger.exception("Error importando playlist")
+        print("Error importando playlist.")
         return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
@@ -311,7 +311,7 @@ def import_youtube_playlist():
 @playlist_bp.route("/play/<path:filename>")
 def play_song(filename):
 
-    if "username" not in session:
+    if "user_id" not in session or "username" not in session:
         abort(401)
 
     username = session["username"]
@@ -323,7 +323,11 @@ def play_song(filename):
 
     file_path = os.path.join(user_music_folder, filename)
 
+    print("PLAY REQUEST:", filename)
+    print("PATH:", file_path)
+
     if not os.path.exists(file_path):
+        print("FILE NOT FOUND")
         abort(404)
 
     return send_from_directory(user_music_folder, filename)

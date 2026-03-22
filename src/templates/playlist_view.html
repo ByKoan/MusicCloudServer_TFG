@@ -7,19 +7,21 @@
 </head>
 <body>
 
-<!-- Botones superiores -->
 <div class="top-buttons">
-    <button class="logout" onclick="window.location.href='/logout'">Cerrar sesión</button>
+    <button class="logout" onclick="window.location.href='/logout'">
+        Cerrar sesión
+    </button>
 </div>
 
 <h1>Playlist: {{ playlist.name }}</h1>
+
 <a href="/playlists" class="btn">Volver a playlists</a>
 <a href="/" class="btn">Volver a Home</a>
 
 <br>
+
 <h2>Canción actual: <span id="currentSongTitle"></span></h2>
 
-<!-- Buscador funcional -->
 <form id="searchForm" class="search-form">
     <input type="text" id="searchInput" placeholder="Buscar canciones...">
     <button type="submit">Buscar</button>
@@ -31,29 +33,41 @@
 </audio>
 
 <br>
+
 <button onclick="handlePreviousClick()">Anterior</button>
 <button onclick="playPause()">Reproducir/Pausa</button>
 <button onclick="handleNextClick()">Siguiente</button>
 
 <br>
-<button onclick="toggleShuffle()">Modo Aleatorio: <span id='shuffleStatus'>Desactivado</span></button>
-<button onclick="toggleLoop()">Modo Bucle: <span id='loopStatus'>Desactivado</span></button>
+
+<button onclick="toggleShuffle()">
+    Modo Aleatorio: <span id="shuffleStatus">Desactivado</span>
+</button>
+
+<button onclick="toggleLoop()">
+    Modo Bucle: <span id="loopStatus">Desactivado</span>
+</button>
 
 <h2>Canciones</h2>
+
 <ul id="songList">
-    {% for song in songs %}
+{% for song in songs %}
     <li class="song-item" data-filename="{{ song }}">
-        <span class="song-title" onclick="playSongByName('{{ song }}')">{{ song }}</span>
-        <button class="remove-from-playlist" data-filename="{{ song }}" data-playlist="{{ playlist.id }}">Quitar</button>
+        <span class="song-title">{{ song }}</span>
+        <button class="remove-from-playlist"
+                data-filename="{{ song }}"
+                data-playlist="{{ playlist.id }}">
+            Quitar
+        </button>
     </li>
-    {% endfor %}
+{% endfor %}
 </ul>
 
 <script>
-    let songs = {{ songs | tojson }};
+    window.songs = {{ songs | tojson }};
 </script>
 
-<script src="{{ url_for('static', filename='player.js') }}"></script>
+<script src="{{ url_for('static', filename='playlist_player.js') }}"></script>
 
 </body>
 </html>
