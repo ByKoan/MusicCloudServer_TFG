@@ -9,7 +9,7 @@
 <div class="login-container">
     <h2>Iniciar sesión</h2>
     {% if error %}
-        <p style="color:red;">{{ error }}</p>
+        <p class="error">{{ error }}</p>
     {% endif %}
     <form method="post" action="/login">
         <label for="username">Usuario:</label>
@@ -19,8 +19,10 @@
         <label for="password">Contraseña:</label>
         <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="password">
 
-        <input type="submit" value="Login">
-        <button>Register</button>
+        <div class="button-group">
+            <input type="submit" value="Login" class="btn">
+            <a href="/register" class="btn">Register</a>
+        </div>
     </form>
 </div>
 </body>

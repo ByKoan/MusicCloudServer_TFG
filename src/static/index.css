@@ -1,4 +1,6 @@
-/* ===== BASE ===== */
+/* =========================
+   BASE
+========================= */
 
 body {
     font-family: Arial, sans-serif;
@@ -14,7 +16,9 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* ===== BOTONES GENERALES ===== */
+/* =========================
+   BOTONES GENERALES
+========================= */
 
 button,
 .btn,
@@ -26,16 +30,20 @@ a {
     font-size: 16px;
     margin: 10px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 6px;
     text-decoration: none;
+    transition: all 0.25s ease;
 }
 
 button:hover,
 .btn:hover {
     background-color: #333;
+    transform: translateY(-1px);
 }
 
-/* ===== BOTONES SUPERIORES ===== */
+/* =========================
+   BOTONES SUPERIORES
+========================= */
 
 .top-buttons {
     position: relative;
@@ -53,7 +61,7 @@ button:hover,
     background-color: #e43f3f;
 }
 
-.admin-panel {
+.menu {
     position: absolute;
     top: 20px;
     left: 20px;
@@ -61,12 +69,14 @@ button:hover,
     color: black;
 }
 
-.admin-panel:hover {
+.menu:hover {
     background-color: #1d2671;
     color: white;
 }
 
-/* ===== PLAYER ===== */
+/* =========================
+   PLAYER
+========================= */
 
 audio {
     margin: 20px auto;
@@ -75,7 +85,9 @@ audio {
     max-width: 600px;
 }
 
-/* ===== FORM BUSCADOR ===== */
+/* =========================
+   FORM BUSCADOR
+========================= */
 
 .search-form {
     margin-bottom: 20px;
@@ -88,37 +100,105 @@ audio {
     border: none;
 }
 
-/* ===== CONTROLES ===== */
+/* =========================
+   CONTROLES
+========================= */
 
 .playback-controls,
-.mode-controls,
 .action-buttons {
     margin: 10px 0;
 }
 
-/* ===== LISTA DE CANCIONES ===== */
+/* =========================
+   TOGGLE BUTTONS (MODOS)
+========================= */
+
+.mode-controls {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 18px;
+}
+
+/* Switch base */
+
+.toggle-switch {
+    width: 60px;
+    height: 30px;
+    background: #444;
+    border-radius: 30px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* círculo */
+
+.toggle-knob {
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s ease;
+}
+
+/* ACTIVADO */
+
+.toggle-switch.active {
+    background: linear-gradient(135deg, #1d2671, #c33764);
+    box-shadow:
+        0 0 10px rgba(195,55,100,0.7),
+        inset 0 0 5px rgba(255,255,255,0.2);
+}
+
+.toggle-switch.active .toggle-knob {
+    left: 33px;
+}
+
+/* Hover efecto premium */
+
+.toggle-switch:hover {
+    transform: scale(1.06);
+}
+
+/* =========================
+   LISTA DE CANCIONES
+========================= */
 
 ul {
     list-style: none;
     padding: 0;
     margin: 20px auto;
-    max-width: 600px;
+    max-width: 650px;
 }
 
 .song-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
-    margin: 5px;
+    padding: 12px;
+    margin: 6px;
     background-color: #000;
-    border-radius: 8px;
+    border-radius: 10px;
     text-align: left;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
 }
 
 .song-item:hover {
     background-color: #333;
+    transform: scale(1.01);
 }
 
 .song-title {
@@ -126,7 +206,9 @@ ul {
     flex-grow: 1;
 }
 
-/* ===== ACCIONES DE CANCIÓN ===== */
+/* =========================
+   ACCIONES DE CANCIÓN
+========================= */
 
 .song-actions {
     display: flex;
@@ -143,7 +225,9 @@ ul {
     background-color: #e43f3f;
 }
 
-/* ===== PLAYLIST ===== */
+/* =========================
+   PLAYLIST SELECT
+========================= */
 
 .add-to-playlist {
     display: inline-block;

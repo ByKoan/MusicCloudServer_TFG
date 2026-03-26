@@ -10,7 +10,7 @@
 <!-- Contenedor de botones fijos arriba -->
 <div class="top-buttons">
     {% if session['user_id'] and session.get('role') == 'admin' %}
-        <button class="admin-panel" onclick="window.location.href='{{ url_for('admin.admin_panel') }}'">
+        <button class="menu" onclick="window.location.href='{{ url_for('admin.admin_panel') }}'">
             Panel de Admin
         </button>
     {% endif %}
@@ -39,8 +39,21 @@
 
 <br>
 <div class="mode-controls">
-    <button onclick="toggleShuffle()">Modo Aleatorio: <span id='shuffleStatus'>Desactivado</span></button>
-    <button onclick="toggleLoop()">Modo Bucle: <span id='loopStatus'>Desactivado</span></button>
+
+    <div class="toggle-container" onclick="toggleShuffleUI()">
+        <span>Modo Aleatorio</span>
+        <div id="shuffleToggle" class="toggle-switch">
+            <div class="toggle-knob"></div>
+        </div>
+    </div>
+
+    <div class="toggle-container" onclick="toggleLoopUI()">
+        <span>Modo Bucle</span>
+        <div id="loopToggle" class="toggle-switch">
+            <div class="toggle-knob"></div>
+        </div>
+    </div>
+
 </div>
 
 <br>

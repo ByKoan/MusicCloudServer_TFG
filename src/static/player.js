@@ -91,17 +91,38 @@ document.addEventListener("DOMContentLoaded", () => {
         loadSong(currentSongIndex);
     }
 
+    // ===============================
+    // TOGGLE UI CONTROLS
+    // ===============================
+
+    window.toggleShuffleUI = function () {
+        toggleShuffle();
+
+        const toggle = document.getElementById("shuffleToggle");
+        if (toggle) {
+            toggle.classList.toggle("active", shuffle);
+        }
+    };
+
+    window.toggleLoopUI = function () {
+        toggleLoop();
+
+        const toggle = document.getElementById("loopToggle");
+        if (toggle) {
+            toggle.classList.toggle("active", loop);
+        }
+    };
+
+    // ===============================
+    // TOGGLE LOGIC (REAL STATE)
+    // ===============================
     function toggleShuffle() {
         shuffle = !shuffle;
-        const el = document.getElementById("shuffleStatus");
-        if (el) el.textContent = shuffle ? "Activado" : "Desactivado";
     }
 
     function toggleLoop() {
         loop = !loop;
         if (player) player.loop = loop;
-        const el = document.getElementById("loopStatus");
-        if (el) el.textContent = loop ? "Activado" : "Desactivado";
     }
 
     // ===============================
