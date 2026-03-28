@@ -14,6 +14,25 @@ document.addEventListener("DOMContentLoaded", () => {
     let loop = false;
 
     // ===============================
+    // MENU DROPDOWN
+    // ===============================
+    window.toggleMenu = function () {
+        const menu = document.getElementById("dropdownMenu");
+        if (menu) menu.classList.toggle("show");
+    };
+
+    document.addEventListener("click", function(e) {
+        const menu = document.getElementById("dropdownMenu");
+        const btn = document.querySelector(".menu-toggle");
+
+        if (!menu || !btn) return;
+
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove("show");
+        }
+    });
+
+    // ===============================
     // LOAD SONG
     // ===============================
     function loadSong(index) {

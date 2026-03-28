@@ -13,11 +13,51 @@
 
 <body class="admin-body">
 
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+    <!-- Contenedor izquierdo: menu toggle + dropdown -->
+    <div class="menu-container">
+        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
+
+        <div id="dropdownMenu" class="dropdown-menu">
+
+            {% if session['user_id'] and session.get('role') == 'admin' %}
+            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
+                Panel admin
+            </button>
+            {% endif %}
+
+            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
+                Upload
+            </button>
+
+            <button onclick="location.href='/playlists'">
+                Playlists
+            </button>
+
+            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
+                Youtube
+            </button>
+
+            <button onclick="location.href='/'" class="active">
+                Inicio
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Botón de cerrar sesión -->
+    <button class="logout" onclick="location.href='/logout'">
+        Cerrar sesión
+    </button>
+
+</div>
+
 <div class="admin-container">
 
     <h1>Panel de Administración</h1>
-
-    <a href="/" class="btn-back">Volver</a>
 
 
     <!-- ========================= -->

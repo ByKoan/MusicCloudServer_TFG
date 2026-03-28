@@ -118,3 +118,151 @@ ul {
 .remove-from-playlist:hover {
     background-color: #e01414;
 }
+
+/* =========================
+   NAVBAR
+========================= */
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+/* Contenedor del menú para poder posicionar dropdown relativo */
+.menu-container {
+    position: relative;
+}
+
+/* BOTONES DEL NAVBAR */
+
+.menu-toggle {
+    background-color: greenyellow;
+    color: black;
+}
+
+.menu-toggle:hover {
+    background-color: #1d2671;
+    color: white;
+}
+
+.logout {
+    background-color: #ff4c4c;
+}
+
+.logout:hover {
+    background-color: #e43f3f;
+}
+
+/* =========================
+   DROPDOWN MENU
+========================= */
+
+.dropdown-menu {
+    position: absolute; /* relativo al .menu-container */
+    top: 50px;          /* justo debajo del botón Menu */
+    left: 0;
+    background: #000;
+    border-radius: 40px;
+    padding: 10px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(-10px);
+    z-index: 2000; /* sobre todo */
+}
+
+/* Contenedor del navbar */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+/* Contenedor del botón Menu */
+.menu-container {
+    position: relative;
+}
+
+/* BOTONES DEL NAVBAR */
+.menu-toggle {
+    background-color: greenyellow;
+    color: black;
+}
+
+.menu-toggle:hover {
+    background-color: #1d2671;
+    color: white;
+}
+
+.logout {
+    background-color: #ff4c4c;
+}
+
+.logout:hover {
+    background-color: #e43f3f;
+}
+
+/* =========================
+   DROPDOWN MENU - HORIZONTAL
+========================= */
+
+.dropdown-menu {
+    position: absolute;      /* relativo al .menu-container */
+    top: 0;                  /* alineado al botón */
+    left: 100%;              /* justo a la derecha del botón */
+    background: #000;
+    border-radius: 40px;
+    padding: 10px 15px;
+    display: flex;           /* fila horizontal */
+    flex-direction: row;     /* botones en fila */
+    flex-wrap: nowrap;       /* NO se envuelvan */
+    gap: 10px;               /* espacio entre botones */
+    white-space: nowrap;     /* evita saltos de línea */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateX(-10px);  /* animación suave desde la izquierda */
+    z-index: 2000;           /* sobre todo */
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+}
+
+.dropdown-menu button {
+    background: #d9d9d9;
+    color: black;
+    border-radius: 30px;
+    padding: 10px 25px;
+    flex-shrink: 0;          /* evita que los botones se reduzcan */
+}
+
+.dropdown-menu button:hover {
+    background: white;
+}
+
+.dropdown-menu .active {
+    background: #8cff00;
+}

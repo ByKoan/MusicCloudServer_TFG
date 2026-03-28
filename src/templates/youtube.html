@@ -8,18 +8,60 @@
 </head>
 <body>
 
-<h1>Búsqueda de YouTube</h1>
+<!-- ================= NAVBAR ================= -->
 
-<button id="youtube-back-btn" onclick="window.location.href='/'">Volver al inicio</button>
+<div class="navbar">
+
+    <!-- Contenedor izquierdo: menu toggle + dropdown -->
+    <div class="menu-container">
+        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
+
+        <div id="dropdownMenu" class="dropdown-menu">
+
+            {% if session['user_id'] and session.get('role') == 'admin' %}
+            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
+                Panel admin
+            </button>
+            {% endif %}
+
+            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
+                Upload
+            </button>
+
+            <button onclick="location.href='/playlists'">
+                Playlists
+            </button>
+
+            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
+                Youtube
+            </button>
+
+            <button onclick="location.href='/'" class="active">
+                Inicio
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Botón de cerrar sesión -->
+    <button class="logout" onclick="location.href='/logout'">
+        Cerrar sesión
+    </button>
+
+</div>
+
+<h1>Búsqueda de YouTube</h1>
 
 <div class="youtube-search-container">
     <input type="text" id="youtube-search-input" placeholder="Buscar en YouTube...">
     <button id="youtube-search-btn">Buscar</button>
-    <button id="youtube-loop-btn">Bucle: <span id="loopSongStatus">Desactivado</span></button>
 </div>
 
 <div class="youtube-player-container">
     <audio id="youtube-player" controls></audio>
+    <br>
+    <button id="youtube-loop-btn">Bucle: <span id="loopSongStatus">Desactivado</span></button>
+    <br>
     <p id="now-playing">Nada reproduciéndose</p>
 </div>
 

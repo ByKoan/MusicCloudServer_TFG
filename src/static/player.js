@@ -1,6 +1,25 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     // ===============================
+    // MENU DROPDOWN
+    // ===============================
+    window.toggleMenu = function () {
+        const menu = document.getElementById("dropdownMenu");
+        if (menu) menu.classList.toggle("show");
+    };
+
+    document.addEventListener("click", function(e) {
+        const menu = document.getElementById("dropdownMenu");
+        const btn = document.querySelector(".menu-toggle");
+
+        if (!menu || !btn) return;
+
+        if (!menu.contains(e.target) && !btn.contains(e.target)) {
+            menu.classList.remove("show");
+        }
+    });
+
+    // ===============================
     // SONG ACCESS
     // ===============================
     function getSongs() {
@@ -166,46 +185,65 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===============================
     // ADD TO PLAYLIST
     // ===============================
-    document.querySelectorAll(".add-to-playlist").forEach(container => {
-        const addBtn = container.querySelector(".add-btn");
-        const select = container.querySelector(".playlist-select");
-        if (!addBtn || !select) return;
 
-        addBtn.addEventListener("click", e => {
+    document.querySelectorAll(".playlist-wrapper").forEach(wrapper => {
+
+        const btn = wrapper.querySelector(".add-btn");
+        const dropdown = wrapper.querySelector(".playlist-dropdown");
+
+        if (!btn || !dropdown) return;
+
+        btn.addEventListener("click", e => {
             e.stopPropagation();
-            const isOpen = select.style.display === "inline-block";
-            document.querySelectorAll(".playlist-select").forEach(s => s.style.display = "none");
-            select.style.display = isOpen ? "none" : "inline-block";
-        });
 
-        select.addEventListener("click", e => e.stopPropagation());
-
-        select.addEventListener("change", async () => {
-            const playlistId = select.value;
-            if (!playlistId) return;
-            const songItem = container.closest(".song-item");
-            const filename = songItem?.dataset.filename;
-            if (!filename) return;
-
-            try {
-                const res = await fetch("/add_to_playlist", {
-                    method: "POST",
-                    headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({ filename, playlist_id: playlistId })
+            // cerrar otros abiertos
+            document.querySelectorAll(".playlist-dropdown")
+                .forEach(d => {
+                    if (d !== dropdown) d.classList.remove("show");
                 });
-                const data = await res.json();
-                alert(data.success ? `"${filename}" añadida a la playlist` : `Error: ${data.error}`);
-            } catch (err) {
-                alert("Error al añadir la canción: " + err);
-            }
 
-            select.style.display = "none";
-            select.selectedIndex = 0;
+            dropdown.classList.toggle("show");
         });
+
+        dropdown.querySelectorAll(".playlist-option").forEach(option => {
+
+            option.addEventListener("click", async () => {
+
+                const playlistId = option.dataset.playlist;
+                const songItem = wrapper.closest(".song-item");
+                const filename = songItem.dataset.filename;
+
+                try {
+                    const res = await fetch("/add_to_playlist", {
+                        method: "POST",
+                        headers: {"Content-Type": "application/json"},
+                        body: JSON.stringify({
+                            filename,
+                            playlist_id: playlistId
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    alert(data.success
+                        ? `"${filename}" añadida`
+                        : `Error: ${data.error}`);
+
+                } catch (err) {
+                    alert("Error: " + err);
+                }
+
+                dropdown.classList.remove("show");
+            });
+
+        });
+
     });
 
+    // cerrar al hacer click fuera
     document.addEventListener("click", () => {
-        document.querySelectorAll(".playlist-select").forEach(s => s.style.display = "none");
+        document.querySelectorAll(".playlist-dropdown")
+            .forEach(d => d.classList.remove("show"));
     });
 
     // ===============================

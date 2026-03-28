@@ -5,39 +5,72 @@
     <title>{{ current_song }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
+
 <body>
 
-<!-- Contenedor de botones fijos arriba -->
-<div class="top-buttons">
-    {% if session['user_id'] and session.get('role') == 'admin' %}
-        <button class="menu" onclick="window.location.href='{{ url_for('admin.admin_panel') }}'">
-            Panel de Admin
-        </button>
-    {% endif %}
-    <button class="logout" onclick="window.location.href='/logout'">Cerrar sesión</button>
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+    <!-- Contenedor izquierdo: menu toggle + dropdown -->
+    <div class="menu-container">
+        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
+
+        <div id="dropdownMenu" class="dropdown-menu">
+
+            {% if session['user_id'] and session.get('role') == 'admin' %}
+            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
+                Panel admin
+            </button>
+            {% endif %}
+
+            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
+                Upload
+            </button>
+
+            <button onclick="location.href='/playlists'">
+                Playlists
+            </button>
+
+            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
+                Youtube
+            </button>
+
+            <button onclick="location.href='/'" class="active">
+                Inicio
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Botón de cerrar sesión -->
+    <button class="logout" onclick="location.href='/logout'">
+        Cerrar sesión
+    </button>
+
 </div>
+
+<!-- ================= CONTENIDO ================= -->
 
 <h1>Bienvenido, {{ session['user_id'] }}</h1>
 <h2>Canción actual: <span id="currentSongTitle">{{ current_song }}</span></h2>
 
-<form id="searchForm" action="/" method="get" class="search-form">
-    <input type="text" id="searchInput" name="search" placeholder="Buscar canciones..." value="{{ request.args.get('search', '') }}">
+<form id="searchForm" class="search-form">
+    <input type="text" id="searchInput" placeholder="Buscar canciones...">
     <button type="submit">Buscar</button>
-    <button type="button" id="resetSearch" class="btn">Reiniciar</button>
+    <button type="button" id="resetSearch">Reiniciar</button>
 </form>
 
 <audio id="player" controls autoplay>
     <source id="audioSource" src="" type="audio/mpeg">
 </audio>
 
-<br>
 <div class="playback-controls">
     <button onclick="handlePreviousClick()">Anterior</button>
     <button onclick="playPause()">Reproducir/Pausa</button>
     <button onclick="handleNextClick()">Siguiente</button>
 </div>
 
-<br>
 <div class="mode-controls">
 
     <div class="toggle-container" onclick="toggleShuffleUI()">
@@ -56,44 +89,45 @@
 
 </div>
 
-<br>
-<div class="action-buttons">
-    <a href="{{ url_for('upload.upload_file') }}" class="btn">Subir nuevas canciones</a>
-    <a href="/playlists" class="btn">Playlists</a>
-    <a href="{{ url_for('youtube.youtube_page') }}" class="btn">Buscar en YouTube</a>
-</div>
-
 <ul id="songList">
 {% for song in songs %}
-    <li class="song-item" data-filename="{{ song }}">
-        <span class="song-title" onclick="loadSong({{ loop.index0 }})">{{ song }}</span>
-        <div class="song-actions">
-            <!-- Botón Borrar -->
-            <button class="delete-song-btn" data-filename="{{ song }}">Borrar</button>
+<li class="song-item" data-filename="{{ song }}">
 
-            <!-- Botón Añadir a Playlist -->
-            <div class="add-to-playlist">
-                <button class="add-btn">+</button>
-                <select class="playlist-select" style="display:none;">
-                    <option value="" selected disabled>Seleccionar playlist</option>
-                    {% for playlist in playlists %}
-                        <option value="{{ playlist.id }}">{{ playlist.name }}</option>
-                    {% endfor %}
-                </select>
+    <span class="song-title">{{ song }}</span>
+
+    <div class="song-actions">
+
+        <!-- BORRAR -->
+        <button class="delete-song-btn"
+                data-filename="{{ song }}">
+            Borrar
+        </button>
+
+        <!-- PLAYLIST -->
+        <div class="playlist-wrapper">
+
+            <button class="add-btn">+</button>
+
+            <div class="playlist-dropdown">
+                {% for playlist in playlists %}
+                    <div class="playlist-option"
+                         data-playlist="{{ playlist.id }}">
+                        {{ playlist.name }}
+                    </div>
+                {% endfor %}
             </div>
+
         </div>
-    </li>
+
+    </div>
+
+</li>
 {% endfor %}
 </ul>
 
 <script>
 window.songs = {{ songs | tojson }};
 window.currentSongIndex = 0;
-
-if (window.songs.length > 0 && "{{ current_song }}" !== "") {
-    const idx = window.songs.findIndex(s => s === "{{ current_song }}");
-    if (idx !== -1) window.currentSongIndex = idx;
-}
 </script>
 
 <script src="{{ url_for('static', filename='player.js') }}"></script>
