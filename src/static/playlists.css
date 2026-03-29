@@ -264,3 +264,66 @@ ul {
 .dropdown-menu .active {
     background: #8cff00;
 }
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 650px) {
+
+    body {
+        padding: 70px 10px 20px;
+    }
+
+    .playback-controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin: 15px auto;
+    }
+
+    audio {
+        max-width: 100%;
+    }
+
+    .nav-btn {
+        width: 100%;
+        max-width: 200px;
+        padding: 10px;
+        margin: 4px 0;
+    }
+
+    .mode-controls {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .toggle-container {
+        gap: 8px;
+        font-size: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .song-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .song-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .dropdown-menu {
+        flex-direction: column;
+        top: 50px;
+        left: 0;
+        transform: translateY(-10px);
+    }
+
+    .dropdown-menu.show {
+        transform: translateY(0);
+    }
+}

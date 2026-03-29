@@ -84,87 +84,26 @@ button:hover,
 }
 
 /* =========================
-   DROPDOWN MENU
-========================= */
-
-.dropdown-menu {
-    position: absolute; /* relativo al .menu-container */
-    top: 50px;          /* justo debajo del botón Menu */
-    left: 0;
-    background: #000;
-    border-radius: 40px;
-    padding: 10px;
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s, transform 0.3s;
-    transform: translateY(-10px);
-    z-index: 2000; /* sobre todo */
-}
-
-/* Contenedor del navbar */
-.navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
-    z-index: 1000;
-}
-
-/* Contenedor del botón Menu */
-.menu-container {
-    position: relative;
-}
-
-/* BOTONES DEL NAVBAR */
-.menu-toggle {
-    background-color: greenyellow;
-    color: black;
-}
-
-.menu-toggle:hover {
-    background-color: #1d2671;
-    color: white;
-}
-
-.logout {
-    background-color: #ff4c4c;
-}
-
-.logout:hover {
-    background-color: #e43f3f;
-}
-
-/* =========================
    DROPDOWN MENU - HORIZONTAL
 ========================= */
 
 .dropdown-menu {
-    position: absolute;      /* relativo al .menu-container */
-    top: 0;                  /* alineado al botón */
-    left: 100%;              /* justo a la derecha del botón */
+    position: absolute;      
+    top: 0;                  
+    left: 100%;              
     background: #000;
     border-radius: 40px;
     padding: 10px 15px;
-    display: flex;           /* fila horizontal */
-    flex-direction: row;     /* botones en fila */
-    flex-wrap: nowrap;       /* NO se envuelvan */
-    gap: 10px;               /* espacio entre botones */
-    white-space: nowrap;     /* evita saltos de línea */
+    display: flex;           
+    flex-direction: row;     
+    flex-wrap: nowrap;       
+    gap: 10px;               
+    white-space: nowrap;     
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s, transform 0.3s;
-    transform: translateX(-10px);  /* animación suave desde la izquierda */
-    z-index: 2000;           /* sobre todo */
+    transform: translateX(-10px);
+    z-index: 2000;           
 }
 
 .dropdown-menu.show {
@@ -178,7 +117,7 @@ button:hover,
     color: black;
     border-radius: 30px;
     padding: 10px 25px;
-    flex-shrink: 0;          /* evita que los botones se reduzcan */
+    flex-shrink: 0;
 }
 
 .dropdown-menu button:hover {
@@ -370,7 +309,6 @@ ul {
     background: #333;
 }
 
-
 /* =========================
    RESPONSIVE
 ========================= */
@@ -378,7 +316,37 @@ ul {
 @media (max-width: 650px) {
 
     body {
-        padding: 90px 10px;
+        padding: 70px 10px 20px;
+    }
+
+    .playback-controls {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        margin: 15px auto;
+    }
+
+    audio {
+        max-width: 100%;
+    }
+
+    .nav-btn {
+        width: 100%;
+        max-width: 200px;
+        padding: 10px;
+        margin: 4px 0;
+    }
+
+    .mode-controls {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .toggle-container {
+        gap: 8px;
+        font-size: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .song-item {
@@ -390,5 +358,16 @@ ul {
     .song-actions {
         width: 100%;
         justify-content: flex-end;
+    }
+
+    .dropdown-menu {
+        flex-direction: column;
+        top: 50px;
+        left: 0;
+        transform: translateY(-10px);
+    }
+
+    .dropdown-menu.show {
+        transform: translateY(0);
     }
 }

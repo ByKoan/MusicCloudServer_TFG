@@ -48,18 +48,28 @@ document.addEventListener("DOMContentLoaded", () => {
         if (index >= songs.length) index = 0;
 
         currentSongIndex = index;
-
         const song = songs[currentSongIndex];
 
         audioSource.src = "/play/" + encodeURIComponent(song);
         player.load();
-
         player.play().catch(() => {});
 
-        if (currentSongTitle)
-            currentSongTitle.textContent = song;
-
+        if (currentSongTitle) currentSongTitle.textContent = song;
         document.title = song;
+
+        // Media Session API
+        if ("mediaSession" in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song,
+                artist: "Koan",
+                album: "MusicCloudServer",
+                artwork: [{ src: "https://via.placeholder.com/96", sizes: "96x96", type: "image/png" }]
+            });
+            navigator.mediaSession.setActionHandler("play", () => player.play());
+            navigator.mediaSession.setActionHandler("pause", () => player.pause());
+            navigator.mediaSession.setActionHandler("nexttrack", handleNextClick);
+            navigator.mediaSession.setActionHandler("previoustrack", handlePreviousClick);
+        }
     }
 
     // ===============================

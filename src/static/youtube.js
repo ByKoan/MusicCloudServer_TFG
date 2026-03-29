@@ -113,25 +113,51 @@ document.addEventListener("DOMContentLoaded", () => {
     // PLAY YOUTUBE AUDIO
     // ===============================
     async function playYoutube(url, title) {
+        try {
+            // Solicitud al servidor para obtener el audio
+            const res = await fetch("/youtube_audio", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url })
+            });
 
-        const res = await fetch("/youtube_audio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url })
-        });
+            const data = await res.json();
 
-        const data = await res.json();
+            if (!data.success) {
+                alert(data.error);
+                return;
+            }
 
-        if (!data.success) {
-            alert(data.error);
-            return;
+            // Reproducir el audio
+            player.src = data.audio;
+            player.play();
+
+            // Actualizar texto en la interfaz
+            if (nowPlaying)
+                nowPlaying.textContent = "Reproduciendo: " + title;
+
+            // =========================
+            // Media Session API
+            // =========================
+            if ("mediaSession" in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title,
+                    artist: "Koan",
+                    album: "MusicCloudServer",
+                    artwork: [
+                        { src: "https://via.placeholder.com/96", sizes: "96x96", type: "image/png" }
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler("play", () => player.play());
+                navigator.mediaSession.setActionHandler("pause", () => player.pause());
+                navigator.mediaSession.setActionHandler("nexttrack", handleNextClick);
+                navigator.mediaSession.setActionHandler("previoustrack", handlePreviousClick);
+            }
+
+        } catch (error) {
+            console.error("Error al reproducir YouTube:", error);
         }
-
-        player.src = data.audio;
-        player.play();
-
-        if (nowPlaying)
-            nowPlaying.textContent = "Reproduciendo: " + title;
     }
 
     // ===============================
