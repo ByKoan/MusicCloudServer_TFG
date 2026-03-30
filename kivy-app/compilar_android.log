@@ -1,0 +1,20 @@
+
+ ╔══════════════════════════════════════════╗
+ ║     Music Cloud - Compilador Android     ║
+ ╚══════════════════════════════════════════╝
+
+ Proyecto : C:\Users\Koan0xFF\Desktop\MusicCloudServer_TFG\kivy-app
+ WSL path : /mnt/c/Users/Koan0xFF/Desktop/MusicCloudServer_TFG/kivy-app
+
+/bin/bash: -c: line 1: unexpected EOF while looking for matching `"'
+Variable de entorno -e no definida
+"VENV" no se reconoce como un comando interno o externo,
+programa o archivo por lotes ejecutable.
+"PROJECT" no se reconoce como un comando interno o externo,
+programa o archivo por lotes ejecutable.
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+' [1/5] Comprobando dependencias del sistema'
+'━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━'
+"MISSING" no se reconoce como un comando interno o externo,
+programa o archivo por lotes ejecutable.
+No se esperaba pkg en este momento.

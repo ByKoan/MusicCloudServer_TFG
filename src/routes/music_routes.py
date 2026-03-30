@@ -127,3 +127,36 @@ def delete_song():
             return jsonify({"error": f"No se pudo borrar del disco: {e}"}), 500
 
     return jsonify({"success": True})
+
+@music_bp.route("/api/songs")
+def api_songs():
+    """Devuelve las canciones y playlists del usuario en JSON."""
+    if "user_id" not in session:
+        return jsonify({"error": "No autorizado"}), 403
+
+    username = session["user_id"]
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("SELECT filename FROM songs WHERE uploaded_by = %s", (username,))
+    songs = [row["filename"] for row in cursor.fetchall()]
+
+    cursor.execute("SELECT id, name FROM playlists WHERE user_id = %s", (username,))
+    playlists = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return jsonify({"songs": songs, "playlists": playlists})
+
+
+@music_bp.route("/api/me")
+def api_me():
+    """Devuelve el rol del usuario logueado."""
+    if "user_id" not in session:
+        return jsonify({"error": "No autorizado"}), 403
+
+    return jsonify({
+        "username": session["user_id"],
+        "role": session.get("role", "user")
+    })
