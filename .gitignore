@@ -7,7 +7,3 @@
 /src/utils/__pycache__/*.*
 .obsidian/
 /src/resources/__pycache__
-/kivy-app/__pycache__/*.*
-/kivy-app/screens/__pycache__/*.*
-/kivy-app/.buildozer/ 
-/kivy-app/services/__pycache__/*.*
