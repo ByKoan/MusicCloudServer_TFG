@@ -5,8 +5,7 @@ dotenv
 colorama
 psutil
 yt_dlp
-kivy
 requests
-# Uncomment this if you wanna get the visualizer
+# Install this to use the desktop visualizer
 #PyQt6 
 #PyQt6-WebEngine
