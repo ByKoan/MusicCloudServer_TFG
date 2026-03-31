@@ -61,10 +61,8 @@ def upload_file():
 
             try:
 
-                # guardar archivo
                 file.save(file_path)
 
-                # insertar en tabla songs
                 cursor.execute(
                     """
                     INSERT INTO songs (title, filename, uploaded_by, plays)
@@ -73,7 +71,6 @@ def upload_file():
                     (filename, filename, username, 0)
                 )
 
-                # actualizar contador del usuario
                 cursor.execute(
                     """
                     UPDATE users

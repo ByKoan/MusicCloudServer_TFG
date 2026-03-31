@@ -198,17 +198,11 @@ def import_youtube_playlist():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # =========================
-        # obtener info SIN descargar primero
-        # =========================
         with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
             info = ydl.extract_info(youtube_url, download=False)
 
         playlist_title = info.get("title", "YouTube Playlist")
 
-        # =========================
-        # crear playlist en DB
-        # =========================
         cursor.execute("""
             INSERT INTO playlists (name, user_id)
             VALUES (%s, %s)
@@ -216,18 +210,12 @@ def import_youtube_playlist():
 
         playlist_id = cursor.lastrowid
 
-        # =========================
-        # carpeta usuario
-        # =========================
         user_music_folder = os.path.join(
             Config.BASE_MUSIC_FOLDER,
             username
         )
         os.makedirs(user_music_folder, exist_ok=True)
 
-        # =========================
-        # opciones descarga
-        # =========================
         ydl_opts = {
             "format": "bestaudio/best",
             "outtmpl": os.path.join(user_music_folder, "%(title)s.%(ext)s"),
@@ -242,9 +230,6 @@ def import_youtube_playlist():
 
         downloaded = 0
 
-        # =========================
-        # descargar canciones
-        # =========================
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 
             info = ydl.extract_info(youtube_url, download=True)
@@ -261,9 +246,6 @@ def import_youtube_playlist():
                 if not title or not allowed_file(filename):
                     continue
 
-                # -------------------------
-                # insertar canción (si no existe)
-                # -------------------------
                 cursor.execute("""
                     SELECT id FROM songs
                     WHERE filename=%s AND uploaded_by=%s
@@ -282,9 +264,6 @@ def import_youtube_playlist():
                     song_id = cursor.lastrowid
                     downloaded += 1
 
-                # -------------------------
-                # vincular a playlist
-                # -------------------------
                 cursor.execute("""
                     INSERT INTO playlist_songs (playlist_id, song_id)
                     VALUES (%s, %s)
@@ -307,7 +286,6 @@ def import_youtube_playlist():
         cursor.close()
         conn.close()
 
-# Need to fix play songs from playlist
 @playlist_bp.route("/play/<path:filename>")
 def play_song(filename):
 
