@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseStream - Búsqueda YouTube</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='youtube.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<div class="navbar">
+
+    <!-- Contenedor izquierdo: menu toggle + dropdown -->
+    <div class="menu-container">
+        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
+
+        <div id="dropdownMenu" class="dropdown-menu">
+
+            {% if session['user_id'] and session.get('role') == 'admin' %}
+            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
+                Panel admin
+            </button>
+            {% endif %}
+
+            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
+                Upload
+            </button>
+
+            <button onclick="location.href='/playlists'">
+                Playlists
+            </button>
+
+            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
+                Youtube
+            </button>
+
+            <button onclick="location.href='/'" class="active">
+                Inicio
+            </button>
+
+        </div>
+    </div>
+
+    <!-- Botón de cerrar sesión -->
+    <button class="logout" onclick="location.href='/logout'">
+        Cerrar sesión
+    </button>
+
+</div>
+
+<h1>Búsqueda de YouTube</h1>
+
+<div class="youtube-search-container">
+    <input type="text" id="youtube-search-input" placeholder="Buscar en YouTube...">
+    <button id="youtube-search-btn">Buscar</button>
+</div>
+
+<div class="youtube-player-container">
+
+    <!-- Reproductor VIDEO (al hacer click en miniatura) -->
+    <video id="youtube-video-player" controls playsinline webkit-playsinline style="display:none;"></video>
+
+    <!-- Reproductor AUDIO (al hacer click en ▶ Audio) -->
+    <audio id="youtube-audio-player" controls style="display:none;"></audio>
+
+    <div class="mode-controls">
+        <div class="toggle-container" id="youtubeLoopToggleContainer">
+            <span>Modo Bucle</span>
+            <div id="youtubeLoopToggle" class="toggle-switch">
+                <div class="toggle-knob"></div>
+            </div>
+        </div>
+    </div>
+
+    <p id="now-playing">Nada reproduciéndose</p>
+</div>
+
+<ul id="youtube-results" class="youtube-results-list"></ul>
+
+<!-- ================= FOOTER CONTADOR ================= -->
+<div class="song-count-footer" id="youtube-count-footer" style="display:none;">
+    <span id="youtube-result-count">0</span> resultado<span id="youtube-result-plural">s</span> encontrado<span id="youtube-result-plural2">s</span>
+</div>
+
+<script src="{{ url_for('static', filename='youtube.js') }}"></script>
+<script src="{{ url_for('static', filename='session_guard.js') }}"></script>
+</body>
+</html>
