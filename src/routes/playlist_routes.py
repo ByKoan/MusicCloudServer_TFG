@@ -379,7 +379,7 @@ def import_youtube_playlist():
                 # Vídeos marcados como no disponibles pueden tener título "[Private video]"
                 # o "[Deleted video]" — los saltamos para no guardar basura en la BD
                 if title in ("[Private video]", "[Deleted video]", None):
-                    print(f"[playlist] ⚠ Saltando vídeo no disponible: {video_id}")
+                    print(f"[playlist] Saltando vídeo no disponible: {video_id}")
                     continue
 
                 # Usar prepare_filename para obtener el nombre real que yt-dlp
@@ -419,7 +419,7 @@ def import_youtube_playlist():
                             UPDATE songs SET youtube_video_id = %s
                             WHERE id = %s AND (youtube_video_id IS NULL OR youtube_video_id = '')
                         """, (video_id, song_id))
-                    print(f"[playlist] ✓ Ya existía en BD: {title}")
+                    print(f"[playlist] Ya existía en BD: {title}")
                 else:
                     # Inserta nueva canción con youtube_video_id
                     cursor.execute("""
@@ -439,7 +439,7 @@ def import_youtube_playlist():
 
         conn.commit()
 
-        print(f"[playlist] ✅ Importación completada: '{playlist_title}' — {downloaded} canciones nuevas de {total_videos} vídeos")
+        print(f"[playlist] Importación completada: '{playlist_title}' — {downloaded} canciones nuevas de {total_videos} vídeos")
 
         return jsonify({
             "success": True,
@@ -449,7 +449,7 @@ def import_youtube_playlist():
 
     except Exception as e:
         conn.rollback()
-        print(f"[playlist] ❌ Error importando playlist: {e}")
+        print(f"[playlist] Error importando playlist: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
     finally:
