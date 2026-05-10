@@ -118,6 +118,7 @@
             : 'Tu cuenta ha sido suspendida temporalmente.';
 
         showOverlay(
+            '\uD83D\uDEAB',
             'Cuenta suspendida',
             fechaTexto + '<br><br>Si crees que es un error, contacta con el administrador.',
             'Ir al inicio de sesi\u00f3n',
@@ -130,6 +131,7 @@
     // ============================================================
     function showDeletedOverlay() {
         showOverlay(
+            '\uD83D\uDDD1\uFE0F',
             'Cuenta eliminada',
             'Tu cuenta ha sido eliminada del sistema.<br><br>Si crees que es un error, contacta con el administrador.',
             'Ir al inicio de sesi\u00f3n',
