@@ -91,5 +91,6 @@
       <div class="song-count-footer" id="playlist-count-footer">
          <span id="playlist-count-num">{{ playlists | length }}</span> playlist<span id="playlist-count-plural">{% if playlists | length != 1 %}s{% endif %}</span> en tu biblioteca
       </div>
-   </body>
+   <script src="{{ url_for('static', filename='session_guard.js') }}"></script>
+</body>
 </html>

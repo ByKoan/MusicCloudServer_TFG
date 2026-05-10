@@ -140,6 +140,49 @@ def register_get():
 
 
 # ===============================
+# CHECK ROLE (API JSON — tiempo real)
+# Consulta el rol actual del usuario en la BD y actualiza la sesión.
+# Llamado periódicamente desde el frontend para detectar cambios de rol
+# sin necesidad de cerrar sesión.
+#
+# Devuelve: { "role": "admin" | "user" }
+# Redirige a /login si el usuario no está logueado.
+# ===============================
+@auth_bp.route('/check_role')
+def check_role():
+
+    # El usuario debe estar logueado para consultar su rol
+    if 'user_id' not in session:
+        return jsonify({'error': 'not_authenticated'}), 401
+
+    # Consulta el rol actual directamente en la BD (ignora la sesión cacheada)
+    current_role = get_user_role(session['user_id'])
+
+    # Si el usuario ya no existe en la BD (fue eliminado) → cierra la sesión
+    if current_role is None:
+        session.pop('user_id',  None)
+        session.pop('username', None)
+        session.pop('role',     None)
+        return jsonify({'error': 'user_deleted'}), 404
+
+    # Comprueba si el usuario tiene un ban activo en este momento
+    banned_until = get_user_ban(session['user_id'])
+    if banned_until and banned_until > datetime.now():
+        session.pop('user_id',  None)
+        session.pop('username', None)
+        session.pop('role',     None)
+        return jsonify({
+            'error':        'user_banned',
+            'banned_until': banned_until.strftime('%d/%m/%Y %H:%M')
+        }), 403
+
+    # Sincroniza la sesión con el valor real de la BD
+    session['role'] = current_role
+
+    return jsonify({'role': current_role})
+
+
+# ===============================
 # LOGOUT
 # Limpia todos los datos de sesión y redirige al login
 # ===============================

@@ -142,5 +142,6 @@ window.currentSongIndex = 0;
     {{ songs | length }} canción{% if songs | length != 1 %}es{% endif %} en tu biblioteca
 </div>
 
+<script src="{{ url_for('static', filename='session_guard.js') }}"></script>
 </body>
 </html>

@@ -133,5 +133,6 @@
     {{ songs | length }} canción{% if songs | length != 1 %}es{% endif %} en esta playlist
 </div>
 
+<script src="{{ url_for('static', filename='session_guard.js') }}"></script>
 </body>
 </html>
