@@ -82,6 +82,23 @@ services:
           cpus: '0.50'
           memory: 256M
 
+  ngrok:
+    image: ngrok/ngrok:latest
+    command:
+      - "http"
+      - "webserver:8080"
+    env_file:
+      - ngrok.env
+    ports:
+      - "4040:4040"
+    depends_on:
+      webserver:
+        condition: service_started
+      db:
+        condition: service_healthy
+    networks:
+      - pulsestream
+
 volumes:
   mysql_data:
 
