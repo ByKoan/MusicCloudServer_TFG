@@ -83,7 +83,9 @@ services:
           memory: 256M
 
   ngrok:
+    container_name: ngrok
     image: ngrok/ngrok:latest
+    restart: always
     command:
       - "http"
       - "webserver:8080"
