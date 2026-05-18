@@ -14,3 +14,4 @@
 /Binarios/VisualizadorAndroid/build/*.*
 /src/tests/__pycache__
 /src/tests/reports
+ngrok.env

@@ -25,12 +25,16 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from database.db import get_db_connection
 import os
 import yt_dlp
+from dotenv import load_dotenv
 from yt_dlp import YoutubeDL
 
 youtube_bp = Blueprint("youtube", __name__, template_folder="../templates")
 
 # Carpeta base donde se guardará la música descargada
 BASE_MUSIC_FOLDER = os.getenv("BASE_MUSIC_FOLDER", "/app/music")
+
+# Numero de resultados al buscar en youtube
+YOUTUBE_NUMBER_RESULTS = int(os.getenv("YOUTUBE_NUMBER_RESULTS", 15))
 
 
 # ===============================
@@ -95,7 +99,7 @@ def youtube_search():
 
         # Realizamos búsqueda en YouTube (ytsearch10 = top 10 resultados)
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            search = ydl.extract_info(f"ytsearch10:{query}", download=False)
+            search = ydl.extract_info(f"ytsearch{YOUTUBE_NUMBER_RESULTS}:{query}", download=False)
 
             # Procesamos cada resultado
             for entry in search["entries"]:

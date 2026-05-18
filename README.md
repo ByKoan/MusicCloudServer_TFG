@@ -77,7 +77,14 @@ MusicCloudTFG/
 └── requirements.txt
 ```
 
+> [!IMPORTANT]
+> You must create the `ngrok.env` file via the `ngrok.env.example` and put your *ngrok* token
+> To obtain your *ngrok* public URL run this command on the docker machine that is running the services:
+
+```bash
+curl http://127.0.0.1:4040/api/tunnels
+```
+
 ## Dataflow:
 
 ![Dataflow](dataflow.png)
-
