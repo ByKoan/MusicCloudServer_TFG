@@ -85,6 +85,7 @@ button:hover, .btn:hover, a:hover {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
     gap: 6px;
 }
 
@@ -95,6 +96,17 @@ button:hover, .btn:hover, a:hover {
     border: none;
     flex: 1 1 160px;
     max-width: 280px;
+    box-sizing: border-box;
+}
+
+.search-form button {
+    padding: 8px 16px;
+    font-size: 15px;
+    line-height: 1.4;
+    margin: 0;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
 }
 
 /* ===== LISTA DE CANCIONES ===== */
