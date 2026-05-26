@@ -1,6 +1,6 @@
 Flask
 Werkzeug
-mysql-connector
+mysql-connector-python
 dotenv
 colorama
 psutil
