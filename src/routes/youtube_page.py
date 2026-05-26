@@ -265,9 +265,76 @@ def youtube_download():
     try:
         username = session["username"]  # usuario actual
 
+        # ===============================
+        # COMPROBACIÓN ANTI-DUPLICADOS
+        # Extraemos el video ID de la URL y comprobamos:
+        #   1. Si ya existe en la BD por youtube_video_id (mismo video)
+        #   2. Si el archivo ya existe en disco (mismo nombre)
+        # Si hay duplicado → devolvemos error sin descargar nada.
+        # ===============================
+        video_id_match = None
+        import re
+        m = re.search(r"(?:v=|/)([0-9A-Za-z_-]{11})", url)
+        if m:
+            video_id_match = m.group(1)
+
+        conn_check = get_db_connection()
+        cursor_check = conn_check.cursor(dictionary=True)
+
+        try:
+            if video_id_match:
+                cursor_check.execute(
+                    "SELECT title, filename FROM songs WHERE youtube_video_id = %s AND uploaded_by = %s LIMIT 1",
+                    (video_id_match, username)
+                )
+                existing = cursor_check.fetchone()
+                if existing:
+                    return jsonify({
+                        "success": False,
+                        "duplicate": True,
+                        "error": f"Ya tienes este video descargado: \"{existing['title']}\" ({existing['filename']})"
+                    }), 200
+        finally:
+            cursor_check.close()
+            conn_check.close()
+
         # Creamos carpeta del usuario si no existe
         user_folder = os.path.join(BASE_MUSIC_FOLDER, username)
         os.makedirs(user_folder, exist_ok=True)
+
+        # ===============================
+        # PRE-COMPROBACIÓN POR NOMBRE EN DISCO
+        # Primero extraemos el título sin descargar para saber el nombre del archivo.
+        # Si ya existe en disco, lo rechazamos antes de descargar nada.
+        # ===============================
+        ydl_opts_meta = {
+            "format": "bestaudio/best",
+            "outtmpl": os.path.join(user_folder, "%(title)s.%(ext)s"),
+            "quiet": True,
+            "noplaylist": True,
+            "skip_download": True,
+        }
+
+        with YoutubeDL(ydl_opts_meta) as ydl_meta:
+            try:
+                meta_info = ydl_meta.extract_info(url, download=False)
+            except Exception:
+                meta_info = None
+
+        if meta_info:
+            if meta_info.get("title") in ("[Private video]", "[Deleted video]"):
+                return jsonify({"success": False, "error": f"Vídeo no disponible: {meta_info.get('title')}"}), 200
+
+            pre_filename = ydl_meta.prepare_filename(meta_info)
+            pre_base = os.path.splitext(pre_filename)[0]
+            pre_mp3 = pre_base + ".mp3"
+
+            if os.path.exists(pre_mp3):
+                return jsonify({
+                    "success": False,
+                    "duplicate": True,
+                    "error": f"Ya tienes una canción con ese nombre en tu biblioteca: \"{os.path.basename(pre_mp3)}\""
+                }), 200
 
         # Configuración de descarga de audio en MP3
         ydl_opts = {
@@ -317,18 +384,26 @@ def youtube_download():
         try:
             title = info.get("title", "Unknown")
 
-            # Insertamos canción en tabla songs
-            cursor.execute("""
-                INSERT IGNORE INTO songs (title, filename, uploaded_by)
-                VALUES (%s, %s, %s)
-            """, (title, os.path.basename(filename), username))
+            # Extraemos el video ID de la URL para guardarlo en BD
+            yt_vid_id = None
+            import re as _re
+            _m = _re.search(r"(?:v=|/)([0-9A-Za-z_-]{11})", url)
+            if _m:
+                yt_vid_id = _m.group(1)
 
-            # Incrementamos contador de canciones del usuario
+            # Insertamos canción en tabla songs (solo si no existe ya)
             cursor.execute("""
-                UPDATE users
-                SET total_songs = total_songs + 1
-                WHERE username = %s
-            """, (username,))
+                INSERT IGNORE INTO songs (title, filename, uploaded_by, youtube_video_id)
+                VALUES (%s, %s, %s, %s)
+            """, (title, os.path.basename(filename), username, yt_vid_id))
+
+            # Solo incrementamos el contador si se insertó una fila nueva
+            if cursor.rowcount > 0:
+                cursor.execute("""
+                    UPDATE users
+                    SET total_songs = total_songs + 1
+                    WHERE username = %s
+                """, (username,))
 
             conn.commit()
 

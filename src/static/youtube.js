@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Botón para descargar como MP3
             const downloadBtn = document.createElement("button");
             downloadBtn.textContent = "⬇";
-            playBtn.className = "yt-red-btn"; // Nota: esto sobreescribe la clase de playBtn (bug existente)
+            downloadBtn.className = "yt-download-btn";
             downloadBtn.onclick = () => downloadYoutube(video);
 
             const actions = document.createElement("div");
@@ -293,44 +293,64 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===============================
     // DESCARGAR VÍDEO COMO MP3
     // Envía la URL al backend, que descarga el audio en MP3 y lo guarda en la carpeta
-    // del usuario. Tras la descarga:
+    // del usuario y lo registra en la BD. Tras la descarga:
     //   1. Añade la canción al array window.songs
     //   2. Añade un elemento a la lista #songList del DOM (para reproducirla sin recargar)
-    //   3. Llama a /add_song_to_db para asegurarse de que está en la BD
-    //   4. Carga la canción en el reproductor principal (si window.loadSong existe)
+    //   3. Carga la canción en el reproductor principal (si window.loadSong existe)
     // ===============================
     async function downloadYoutube(video) {
-        // POST /youtube_download — puede tardar según el tamaño del vídeo
-        const res = await fetch("/youtube_download", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: video.url })
-        });
-        const data = await res.json();
-        if (!data.success) { alert(data.error); return; }
+        const btn = document.querySelector(`[data-url="${video.url}"]`);
 
-        alert(`"${data.filename}" descargada`);
+        try {
+            // Deshabilitar el botón durante la descarga para evitar doble clic
+            const allBtns = document.querySelectorAll(".yt-download-btn");
+            allBtns.forEach(b => b.disabled = true);
 
-        // Añade la canción al array global de canciones del reproductor
-        if (!window.songs) window.songs = [];
-        const newIndex = window.songs.length;
-        window.songs.push(data.filename);
-
-        // Añade la canción a la lista visible #songList sin recargar la página
-        if (songList) {
-            const li = document.createElement("li");
-            li.className = "song-item";
-            li.dataset.filename = data.filename;
-            li.innerHTML = `<span class="song-title">${data.filename}</span>`;
-            // Al hacer clic en el título → la carga en el reproductor principal
-            li.querySelector(".song-title").addEventListener("click", () => {
-                if (window.loadSong) window.loadSong(newIndex);
+            // POST /youtube_download — puede tardar según el tamaño del vídeo
+            const res = await fetch("/youtube_download", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: video.url })
             });
-            songList.appendChild(li);
-        }
+            const data = await res.json();
 
-        // Carga y reproduce la canción recién descargada en el reproductor principal
-        if (window.loadSong) window.loadSong(newIndex);
+            if (!data.success) {
+                if (data.duplicate) {
+                    // Mostrar alerta específica de duplicado
+                    alert(`Canción duplicada\n\n${data.error}\n\nNo se ha descargado nada.`);
+                } else {
+                    alert(`Error al descargar:\n${data.error}`);
+                }
+                return;
+            }
+
+            alert(`"${data.filename}" descargada correctamente`);
+
+            // Añade la canción al array global de canciones del reproductor
+            if (!window.songs) window.songs = [];
+            const newIndex = window.songs.length;
+            window.songs.push(data.filename);
+
+            // Añade la canción a la lista visible #songList sin recargar la página
+            if (songList) {
+                const li = document.createElement("li");
+                li.className = "song-item";
+                li.dataset.filename = data.filename;
+                li.innerHTML = `<span class="song-title">${data.filename}</span>`;
+                li.querySelector(".song-title").addEventListener("click", () => {
+                    if (window.loadSong) window.loadSong(newIndex);
+                });
+                songList.appendChild(li);
+            }
+
+            // Carga y reproduce la canción recién descargada en el reproductor principal
+            if (window.loadSong) window.loadSong(newIndex);
+
+        } finally {
+            // Re-habilitar todos los botones de descarga
+            const allBtns = document.querySelectorAll(".yt-download-btn");
+            allBtns.forEach(b => b.disabled = false);
+        }
     }
 
     // ===============================

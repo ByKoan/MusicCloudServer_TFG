@@ -48,16 +48,15 @@ button:hover, .btn:hover, a:hover {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    flex-wrap: wrap;
-    max-width: 850px;
+    flex-wrap: nowrap;
     margin: 16px auto;
 }
 
 .playback-controls audio {
-    flex: 1;
-    max-width: 550px;
+    flex: 0 1 auto;
+    width: 420px;
+    max-width: 100%;
     min-width: 0;
-    width: 100%;
     margin: 0 5px;
 }
 
