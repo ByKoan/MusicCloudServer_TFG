@@ -33,6 +33,7 @@ from werkzeug.security import generate_password_hash  # Cifrado de contraseñas
 from flask import Blueprint, session, redirect, url_for, render_template, request, flash, jsonify
 from database.db import get_user_role, get_db_connection    # Funciones de base de datos
 from resources.manage_database_script import add_user       # Función para crear usuarios en BD
+from resources.sync_music_db import restore_user_songs      # Restaura canciones previas del usuario
 from mysql.connector import IntegrityError                  # Error de duplicado en BD
 
 # Blueprint de admin — todas las rutas tienen el prefijo /admin
@@ -95,6 +96,7 @@ def admin_panel():
         if username and password:
             try:
                 add_user(username, password, role)       # Inserta en la BD
+                restore_user_songs(username)             # Restaura canciones previas si las hay
                 flash(f"Usuario {username} creado con rol {role}", "success")
             except IntegrityError:
                 # El usuario ya existe en la BD
@@ -430,6 +432,52 @@ def server_stats_db():
             "top_user_name":   top_user["username"]    if top_user else None,
             "top_user_total":  top_user["total_songs"] if top_user else None,
         })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
+# ===============================
+# API: LISTA DE USUARIOS (tiempo real)
+# Llamado por polling desde admin.js para mantener la tabla de usuarios
+# actualizada sin recargar la página.
+# Devuelve JSON con id, username, role y banned_until de todos los usuarios.
+# Respeta el parámetro ?search= para el buscador.
+# ===============================
+@admin_bp.route("/users_list")
+@admin_required
+def users_list():
+
+    search = request.args.get("search", "")
+
+    conn   = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        if search:
+            cursor.execute(
+                "SELECT id, username, role, banned_until FROM users WHERE username LIKE %s",
+                ("%" + search + "%",)
+            )
+        else:
+            cursor.execute("SELECT id, username, role, banned_until FROM users")
+
+        users = cursor.fetchall()
+
+        # Serializar banned_until (datetime) a string para JSON
+        result = []
+        for u in users:
+            result.append({
+                "id":           u["id"],
+                "username":     u["username"],
+                "role":         u["role"],
+                "banned_until": u["banned_until"].strftime("%d/%m/%Y %H:%M") if u["banned_until"] else None,
+            })
+
+        return jsonify(result)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

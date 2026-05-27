@@ -100,5 +100,24 @@ def get_user_ban(username):
         conn.close()
 
 
+def get_user_password_hash(username):
+    # Devuelve el hash de contraseña almacenado en BD, o None si el usuario no existe.
+    # Se usa para detectar cambios de contraseña y forzar el cierre de sesión.
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        cursor.execute(
+            "SELECT password FROM users WHERE username = %s",
+            (username,)
+        )
+        user = cursor.fetchone()
+        return user["password"] if user else None
+
+    finally:
+        cursor.close()
+        conn.close()
+
+
 if __name__ == "__main__":
     create_user_db()

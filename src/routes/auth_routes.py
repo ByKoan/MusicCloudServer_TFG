@@ -18,9 +18,10 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
 from services.auth_service import validate_user                    # Valida usuario y contraseña
-from database.db import get_user_role, get_user_ban, get_db_connection  # Funciones de BD
+from database.db import get_user_role, get_user_ban, get_user_password_hash, get_db_connection  # Funciones de BD
 from werkzeug.security import generate_password_hash               # Cifrado de contraseñas
 from datetime import datetime                                       # Manejo de fechas (baneo)
+from resources.sync_music_db import restore_user_songs             # Restaura canciones previas
 
 # Blueprint de autenticación (login, registro, logout)
 auth_bp = Blueprint("auth", __name__)
@@ -55,9 +56,10 @@ def login():
                 )
 
             # Guarda datos del usuario en la sesión
-            session['username'] = username
-            session['user_id']  = username          # username actúa como ID
-            session['role']     = get_user_role(username)  # guarda el rol (user / admin)
+            session['username']      = username
+            session['user_id']       = username          # username actúa como ID
+            session['role']          = get_user_role(username)  # guarda el rol (user / admin)
+            session['password_hash'] = get_user_password_hash(username)  # para detectar cambios de contraseña
 
             # Redirige a la página principal de música
             return redirect(url_for('music.index'))
@@ -103,6 +105,9 @@ def register():
             (username, hashed_password)
         )
         conn.commit()
+
+        # Restaura canciones previas si ya existía una carpeta con ese nombre
+        restore_user_songs(username)
 
         return jsonify({
             "success": True,
@@ -160,21 +165,41 @@ def check_role():
 
     # Si el usuario ya no existe en la BD (fue eliminado) → cierra la sesión
     if current_role is None:
-        session.pop('user_id',  None)
-        session.pop('username', None)
-        session.pop('role',     None)
+        session.pop('user_id',       None)
+        session.pop('username',      None)
+        session.pop('role',          None)
+        session.pop('password_hash', None)
         return jsonify({'error': 'user_deleted'}), 404
 
     # Comprueba si el usuario tiene un ban activo en este momento
     banned_until = get_user_ban(session['user_id'])
     if banned_until and banned_until > datetime.now():
-        session.pop('user_id',  None)
-        session.pop('username', None)
-        session.pop('role',     None)
+        # No destruimos la sesión: el cliente sigue sondeando para detectar el unban
+        session['was_banned'] = True
         return jsonify({
             'error':        'user_banned',
             'banned_until': banned_until.strftime('%d/%m/%Y %H:%M')
         }), 403
+
+    # Si el cliente venía de un estado baneado y el ban ya expiró,
+    # forzamos el logout para que inicie sesión de nuevo de forma limpia
+    if session.get('was_banned'):
+        session.pop('user_id',       None)
+        session.pop('username',      None)
+        session.pop('role',          None)
+        session.pop('password_hash', None)
+        session.pop('was_banned',    None)
+        return jsonify({'error': 'unbanned'}), 205
+
+    # Detecta cambio de contraseña comparando el hash guardado en sesión
+    # con el que hay actualmente en la BD
+    current_hash = get_user_password_hash(session['user_id'])
+    if current_hash and session.get('password_hash') and current_hash != session['password_hash']:
+        session.pop('user_id',       None)
+        session.pop('username',      None)
+        session.pop('role',          None)
+        session.pop('password_hash', None)
+        return jsonify({'error': 'password_changed'}), 401
 
     # Sincroniza la sesión con el valor real de la BD
     session['role'] = current_role

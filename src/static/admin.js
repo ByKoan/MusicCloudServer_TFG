@@ -292,4 +292,162 @@ document.addEventListener("DOMContentLoaded", () => {
         // Actualiza las estadísticas de BD cada 5 segundos
         setInterval(updateServerStats, 5000);
     }
+
+    // ===============================
+    // POLLING DE TABLA DE USUARIOS (tiempo real)
+    // Actualiza el <tbody> de la tabla sin recargar la página.
+    // Se salta la actualización si el usuario está interactuando con alguna fila
+    // (input visible o select visible) para no interrumpir la acción en curso.
+    // ===============================
+    const usersTbody = document.querySelector("table tbody");
+
+    function buildUserRow(u) {
+        // Construye el HTML de una fila exactamente igual al que genera Jinja
+        const bannedText = u.banned_until
+            ? u.banned_until
+            : "No";
+
+        return `<tr data-user-id="${u.id}">
+            <td>${u.id}</td>
+            <td>${u.username}</td>
+            <td>${u.role}</td>
+            <td>${bannedText}</td>
+            <td>
+                <form action="/admin/ban_user" method="POST">
+                    <input type="hidden" name="user_id" value="${u.id}">
+                    <input type="number" name="hours" class="ban-hours-input" placeholder="Horas de ban" style="display:none; width:80px;">
+                    <button type="button" class="ban">Ban</button>
+                </form>
+            </td>
+            <td>
+                <form action="/admin/unban_user" method="POST">
+                    <input type="hidden" name="username" value="${u.username}">
+                    <button class="unban">Unban</button>
+                </form>
+            </td>
+            <td>
+                <form method="POST" action="/admin/change_role/${u.username}" class="role-form">
+                    <select name="role" class="role-select" style="display:none;">
+                        <option value="user"${u.role === "user" ? " selected" : ""}>user</option>
+                        <option value="admin"${u.role === "admin" ? " selected" : ""}>admin</option>
+                    </select>
+                    <button type="button" class="role-btn">Actualizar</button>
+                </form>
+            </td>
+            <td>
+                <form action="/admin/change_password/${u.username}" method="POST" class="password-form">
+                    <input type="password" name="password" placeholder="Nueva contraseña"
+                        class="password-input" style="display:none;" required>
+                    <button type="button" class="change-password-btn">Cambiar</button>
+                </form>
+            </td>
+            <td>
+                <form action="/admin/delete/${u.id}" method="POST">
+                    <button class="delete">Eliminar</button>
+                </form>
+            </td>
+        </tr>`;
+    }
+
+    function isUserInteracting() {
+        // Devuelve true si hay algún input/select desplegado en la tabla
+        if (!usersTbody) return false;
+        const inputs = usersTbody.querySelectorAll(
+            ".ban-hours-input, .password-input, .role-select"
+        );
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].style.display !== "none" && inputs[i].style.display !== "") {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function rebindTableEvents() {
+        // Vuelve a enlazar todos los event listeners tras regenerar el tbody
+
+        usersTbody.querySelectorAll(".ban").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const form = btn.closest("form");
+                const input = form?.querySelector(".ban-hours-input");
+                if (!input) return;
+                if (input.style.display === "none") {
+                    input.style.display = "inline-block";
+                    input.focus();
+                } else {
+                    if (!input.value || Number(input.value) <= 0) {
+                        alert("Introduce un número válido de horas");
+                        input.focus();
+                        return;
+                    }
+                    form.submit();
+                }
+            });
+        });
+
+        usersTbody.querySelectorAll(".unban").forEach(btn => {
+            btn.addEventListener("click", () => btn.closest("form").submit());
+        });
+
+        usersTbody.querySelectorAll(".role-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const form = btn.closest(".role-form");
+                const select = form?.querySelector(".role-select");
+                if (!select) return;
+                if (!select.style.display || select.style.display === "none") {
+                    select.style.display = "inline-block";
+                    select.focus();
+                } else {
+                    if (!select.value) { alert("Selecciona un rol válido"); select.focus(); return; }
+                    form.submit();
+                }
+            });
+        });
+
+        usersTbody.querySelectorAll(".role-select").forEach(select => {
+            select.addEventListener("click", e => e.stopPropagation());
+        });
+
+        usersTbody.querySelectorAll(".change-password-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const form = btn.closest("form");
+                const input = form?.querySelector(".password-input");
+                if (!input) return;
+                if (!input.style.display || input.style.display === "none") {
+                    input.style.display = "inline-block";
+                    input.focus();
+                } else {
+                    if (!input.value.trim()) { alert("Introduce una contraseña válida"); input.focus(); return; }
+                    form.submit();
+                }
+            });
+        });
+
+        usersTbody.querySelectorAll(".delete").forEach(btn => {
+            btn.addEventListener("click", e => {
+                if (!confirm("¿Estás seguro de eliminar este usuario?")) e.preventDefault();
+            });
+        });
+    }
+
+    async function updateUsersTable() {
+        if (!usersTbody) return;
+        if (isUserInteracting()) return;  // No interrumpir mientras el admin está actuando
+
+        try {
+            const searchInput = document.querySelector(".search-form input[name='search']");
+            const searchVal = searchInput ? encodeURIComponent(searchInput.value) : "";
+            const res = await fetch("/admin/users_list?search=" + searchVal);
+            if (!res.ok) return;
+            const users = await res.json();
+
+            usersTbody.innerHTML = users.map(buildUserRow).join("\n");
+            rebindTableEvents();
+        } catch (err) {
+            // Error de red, se reintenta en el siguiente ciclo
+        }
+    }
+
+    // Arrancar polling de tabla de usuarios cada 5 segundos
+    setInterval(updateUsersTable, 5000);
 });
