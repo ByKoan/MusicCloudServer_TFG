@@ -1,0 +1,234 @@
+/* =============================================================
+   PULSESTREAM — Compatibility & JS Bridge CSS
+   Maps old class names used in existing JS files to
+   new design system tokens. Drop this after pulse.css.
+   ============================================================= */
+
+/* ── Toggle compatibility (player.js uses .toggle-switch / .toggle-knob) ── */
+.toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  position: relative;
+  transition: var(--transition);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-knob {
+  width: 18px;
+  height: 18px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: var(--transition);
+}
+
+.toggle-switch.active {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 12px rgba(168,255,62,0.3);
+}
+
+.toggle-switch.active .toggle-knob {
+  left: 22px;
+  background: var(--bg-base);
+}
+
+/* ── playlist_player.js uses .toggle (no -track/-thumb suffix) ── */
+.toggle {
+  width: 44px;
+  height: 24px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 30px;
+  position: relative;
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.toggle::after {
+  content: '';
+  width: 18px;
+  height: 18px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: var(--transition);
+}
+
+.toggle.active {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 12px rgba(168,255,62,0.3);
+}
+
+.toggle.active::after {
+  left: 22px;
+  background: var(--bg-base);
+}
+
+/* ── youtube.js injects .youtube-result-item elements into #youtube-results ── */
+/* Restyle them to match the new grid card look */
+.youtube-results-list .youtube-result-item,
+#youtube-results li,
+#youtube-results .youtube-result-item {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  transition: var(--transition) !important;
+  animation: fadeInUp 0.3s ease both !important;
+  list-style: none !important;
+}
+
+#youtube-results li:hover,
+#youtube-results .youtube-result-item:hover {
+  border-color: rgba(255,95,95,0.3) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5) !important;
+}
+
+#youtube-results img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block;
+}
+
+#youtube-results button {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  margin: 2px;
+}
+
+#youtube-results button:hover {
+  background: var(--bg-hover);
+  color: var(--accent-green);
+}
+
+/* ── Old .song-count-footer (footer bar fallback for pages that still use it) ── */
+.song-count-footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: var(--footer-h);
+  background: rgba(8,10,15,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  z-index: 998;
+}
+
+/* ── Admin panel basic compat ── */
+.admin-section { margin-bottom: 28px; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th,
+.admin-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+}
+.admin-table th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.08em; }
+
+/* ── nav-btn (playlist_view) ── */
+.nav-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: var(--transition);
+}
+.nav-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* ── player-toggles (playlist_view) ── */
+.player-toggles {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* ── sync-btn ── */
+.sync-btn {
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255,95,95,0.2);
+  color: #ff8080;
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: 'DM Sans', sans-serif;
+}
+.sync-btn:hover { background: rgba(255,95,95,0.1); }
+
+/* ── playlist-btn (playlists.js uses this class) ── */
+.playlist-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.playlist-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+/* ── Rename inline input (playlists.js toggles display) ── */
+.rename-input {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  width: 100%;
+  outline: none;
+  margin-bottom: 6px;
+}
+.rename-input:focus { border-color: var(--accent-green); }
+
+/* ── playlist-name-wrapper ── */
+.playlist-name-wrapper .playlist-name a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.playlist-name-wrapper .playlist-name a:hover { color: var(--accent-green); }
+
+/* ── file-input-container (upload) ── */
+.file-input-container {
+  border: 2px dashed var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 40px;
+  text-align: center;
+  background: var(--bg-surface);
+  transition: var(--transition);
+}
+.file-input-container:hover { border-color: var(--accent-green); }

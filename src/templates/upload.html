@@ -1,68 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseStream - Subir Archivos</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='upload.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseStream — Subir Canciones</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse-compat.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
 <body>
 
-<!-- ================= NAVBAR ================= -->
-
-<div class="navbar">
-
-    <!-- Contenedor izquierdo: menu toggle + dropdown -->
-    <div class="menu-container">
-        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
-
-        <div id="dropdownMenu" class="dropdown-menu">
-
-            {% if session['user_id'] and session.get('role') == 'admin' %}
-            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
-                Panel admin
-            </button>
-            {% endif %}
-
-            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
-                Upload
-            </button>
-
-            <button onclick="location.href='/playlists'">
-                Playlists
-            </button>
-
-            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
-                Youtube
-            </button>
-
-            <button onclick="location.href='/'" class="active">
-                Inicio
-            </button>
-
-        </div>
-    </div>
-
-    <!-- Botón de cerrar sesión -->
-    <button class="logout" onclick="location.href='/logout'">
-        Cerrar sesión
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="pulse-dot"></div>
+    PulseStream
+  </div>
+  <div class="nav-center">
+    <a class="nav-link" onclick="location.href='/'">Biblioteca</a>
+    <a class="nav-link" onclick="location.href='/playlists'">Playlists</a>
+    <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+    <a class="nav-link active" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+    {% if session['user_id'] and session.get('role') == 'admin' %}
+    <a class="nav-link" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+    {% endif %}
+  </div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button class="btn-logout" onclick="location.href='/logout'">Salir</button>
+    <button class="menu-toggle-btn" onclick="toggleMobileMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
     </button>
+  </div>
+</nav>
 
+<div class="mobile-menu" id="mobileMenu">
+  <a class="nav-link" onclick="location.href='/'">Biblioteca</a>
+  <a class="nav-link" onclick="location.href='/playlists'">Playlists</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+  <a class="nav-link active" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+  {% if session['user_id'] and session.get('role') == 'admin' %}
+  <a class="nav-link" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+  {% endif %}
+  <button class="btn-logout" onclick="location.href='/logout'" style="margin-top:4px;">Salir</button>
 </div>
 
-<h1>Subir canciones</h1>
+<main class="page-wrap">
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <div class="file-input-container">
-        <label>Selecciona archivos para subir:</label><br>
-        <input type="file" name="file" multiple>
-        <br>
-        <button type="submit">Subir</button>
+  <div class="page-header animate-in">
+    <div class="section-label">Biblioteca</div>
+    <h1>Subir canciones</h1>
+  </div>
+
+  <form action="/upload" method="post" enctype="multipart/form-data" id="uploadForm">
+    <div class="upload-area animate-in" style="animation-delay:0.06s;" id="dropZone">
+      <h2>Arrastra tus archivos aquí</h2>
+      <p>o haz clic para seleccionarlos<br>Formatos: MP3, WAV, FLAC, OGG, M4A</p>
+      <span class="btn btn-primary" style="pointer-events:none;">Seleccionar archivos</span>
+      <input type="file" name="file" multiple accept=".mp3,.wav,.flac,.ogg,.m4a,audio/*" id="fileInput">
     </div>
-</form>
 
+    <div class="file-list" id="fileList"></div>
+
+    <div class="progress-bar-wrap" id="progressWrap">
+      <div class="progress-bar-inner" id="progressBarInner"></div>
+    </div>
+
+    <div class="upload-actions animate-in" style="animation-delay:0.1s;" id="uploadActions" style="display:none;">
+      <button type="submit" class="btn btn-primary" id="uploadBtn">
+        ↑ Subir canciones
+      </button>
+      <button type="button" class="btn btn-ghost" onclick="clearFiles()">
+        ✕ Limpiar
+      </button>
+    </div>
+  </form>
+
+  <div class="tips-grid animate-in" style="animation-delay:0.15s;">
+    <div class="tip-card">
+      <strong>MP3 / WAV</strong>
+      Formatos ampliamente soportados para streaming web.
+    </div>
+    <div class="tip-card">
+      <strong>Múltiple</strong>
+      Puedes subir varias canciones a la vez seleccionando múltiples archivos.
+    </div>
+    <div class="tip-card">
+      <strong>Privado</strong>
+      Tus canciones solo son accesibles por ti.
+    </div>
+  </div>
+
+</main>
+
+<script src="{{ url_for('static', filename='common.js') }}"></script>
 <script src="{{ url_for('static', filename='upload.js') }}"></script>
-
 <script src="{{ url_for('static', filename='session_guard.js') }}"></script>
 </body>
 </html>

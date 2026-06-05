@@ -362,3 +362,39 @@ document.addEventListener("DOMContentLoaded", () => {
         if (e.key === "Enter") searchYoutube();
     });
 });
+
+
+// =============================================================================
+// UI HELPERS movidos desde youtube.html
+// =============================================================================
+
+// Muestra la tarjeta del reproductor cuando un media element comienza a reproducir
+function showPlayerCard() {
+    const card = document.getElementById('yt-player-card');
+    if (card) card.classList.add('visible');
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const vid = document.getElementById('youtube-video-player');
+    const aud = document.getElementById('youtube-audio-player');
+    if (vid) vid.addEventListener('play', showPlayerCard);
+    if (aud) aud.addEventListener('play', showPlayerCard);
+
+    // Actualiza el contador y la etiqueta de resultados cuando cambia la lista
+    const resultsList  = document.getElementById('youtube-results');
+    const countFooter  = document.getElementById('youtube-count-footer');
+    const resultsLabel = document.getElementById('yt-results-label');
+
+    if (resultsList) {
+        const obs = new MutationObserver(function () {
+            const count = resultsList.children.length;
+            const countEl  = document.getElementById('youtube-result-count');
+            const pluralEl = document.getElementById('youtube-result-plural');
+            if (countEl)  countEl.textContent  = count;
+            if (pluralEl) pluralEl.textContent = count !== 1 ? 's' : '';
+            if (countFooter)  countFooter.style.display  = count > 0 ? 'block' : 'none';
+            if (resultsLabel) resultsLabel.style.display = count > 0 ? 'block' : 'none';
+        });
+        obs.observe(resultsList, { childList: true });
+    }
+});

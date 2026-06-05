@@ -1,33 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseStream - Login</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseStream — Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse-compat.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
-<body>
-<div class="login-container">
-    <h2>Iniciar sesión</h2>
+<body class="login-page">
+
+<div class="login-glow"></div>
+
+<div class="login-wrap">
+  <div class="login-brand">
+    <h1>PulseStream</h1>
+    <p>Tu música, siempre contigo</p>
+  </div>
+
+  <div class="login-card">
     {% if error %}
-        <p class="error">{{ error }}</p>
+    <div class="error-msg">{{ error }}</div>
     {% endif %}
 
     <form method="post" action="{{ url_for('auth.login') }}" id="loginForm">
-        <label for="username">Usuario:</label>
-        <input type="text" id="username" name="username" autocomplete="username" required
-               oninput="this.value = this.value.toLowerCase()" placeholder="username">
 
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password" autocomplete="current-password" required placeholder="password">
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <input
+          class="input-field"
+          type="text"
+          id="username"
+          name="username"
+          autocomplete="username"
+          required
+          oninput="this.value = this.value.toLowerCase()"
+          placeholder="tu_usuario"
+        >
+      </div>
 
-        <div class="button-group">
-            <input type="submit" value="Login" class="btn">
-            <button type="button" class="btn" id="registerBtn" data-url="{{ url_for('auth.register') }}">Register</button>
-        </div>
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input
+          class="input-field"
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          required
+          placeholder="••••••••"
+        >
+      </div>
+
+      <input type="submit" value="Iniciar sesión" class="btn btn-primary btn-full" style="margin-top:8px; cursor:pointer;">
+
+      <div class="divider">o</div>
+
+      <button
+        type="button"
+        class="btn btn-secondary btn-full"
+        id="registerBtn"
+        data-url="{{ url_for('auth.register') }}"
+      >
+        Crear cuenta nueva
+      </button>
+
     </form>
+  </div>
+
+  <div class="login-footer">
+    Al continuar aceptas los términos de uso de PulseStream
+  </div>
 </div>
 
 <script src="{{ url_for('static', filename='login.js') }}"></script>
-</body>
+</>
 </html>

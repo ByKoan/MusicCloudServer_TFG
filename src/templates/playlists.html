@@ -1,96 +1,111 @@
 <!DOCTYPE html>
-<html>
-   <head>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>PulseStream - Playlists</title>
-      <link rel="stylesheet" href="{{ url_for('static', filename='playlists.css') }}">
-      <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-   </head>
-   <body>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseStream — Playlists</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse-compat.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
 
-<!-- ================= NAVBAR ================= -->
+<!-- ═══════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="pulse-dot"></div>
+    PulseStream
+  </div>
 
-   <div class="navbar">
+  <div class="nav-center">
+    <a class="nav-link" onclick="location.href='/'">Biblioteca</a>
+    <a class="nav-link active" onclick="location.href='/playlists'">Playlists</a>
+    <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+    <a class="nav-link" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+    {% if session['user_id'] and session.get('role') == 'admin' %}
+    <a class="nav-link" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+    {% endif %}
+  </div>
 
-      <!-- Contenedor izquierdo: menu toggle + dropdown -->
-      <div class="menu-container">
-         <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button class="btn-logout" onclick="location.href='/logout'">Salir</button>
+    <button class="menu-toggle-btn" onclick="toggleMobileMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
-         <div id="dropdownMenu" class="dropdown-menu">
+<div class="mobile-menu" id="mobileMenu">
+  <a class="nav-link" onclick="location.href='/'">Biblioteca</a>
+  <a class="nav-link active" onclick="location.href='/playlists'">Playlists</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+  {% if session['user_id'] and session.get('role') == 'admin' %}
+  <a class="nav-link" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+  {% endif %}
+  <button class="btn-logout" onclick="location.href='/logout'" style="margin-top:4px;">Salir</button>
+</div>
 
-               {% if session['user_id'] and session.get('role') == 'admin' %}
-               <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
-                  Panel admin
-               </button>
-               {% endif %}
+<!-- ═══════════════════════════════════════
+     CONTENT
+═══════════════════════════════════════ -->
+<main class="page-wrap">
 
-               <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
-                  Upload
-               </button>
+  <div class="page-header animate-in">
+    <div class="section-label">Colecciones</div>
+    <h1>Mis Playlists</h1>
+  </div>
 
-               <button onclick="location.href='/playlists'">
-                  Playlists
-               </button>
+  <!-- Create playlist -->
+  <div class="section-label">Nueva playlist</div>
+  <form action="/create_playlist" method="POST" class="create-form animate-in" style="animation-delay:0.05s;">
+    <input class="input-field" type="text" name="name" placeholder="Nombre de la playlist..." required>
+    <button class="btn btn-primary" type="submit">+ Crear</button>
+  </form>
 
-               <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
-                  Youtube
-               </button>
+  <!-- Import from YouTube -->
+  <div class="yt-import-card animate-in" style="animation-delay:0.1s;">
+    <span class="yt-badge">▶ YouTube</span>
+    <input class="input-field" type="text" id="yt-url" placeholder="URL de playlist de YouTube...">
+    <button class="btn btn-secondary" onclick="importYT()" style="flex-shrink:0;">Importar</button>
+  </div>
 
-               <button onclick="location.href='/'" class="active">
-                  Inicio
-               </button>
-
-         </div>
+  <!-- Playlists grid -->
+  <div class="section-label">Tu biblioteca</div>
+  {% if playlists %}
+  <div class="playlist-grid" id="playlistGrid">
+    {% for playlist in playlists %}
+    <div class="playlist-card playlist-item" data-playlist="{{ playlist.id }}" style="animation-delay: {{ loop.index * 0.04 }}s;">
+      <div class="pl-name">
+        <a href="{{ url_for('playlist.view_playlist', playlist_id=playlist.id) }}">{{ playlist.name }}</a>
       </div>
-
-      <!-- Botón de cerrar sesión -->
-      <button class="logout" onclick="location.href='/logout'">
-         Cerrar sesión
-      </button>
-
-   </div>
-
-      <h1>Mis Playlists</h1>
-      <h2>Crear nueva playlist</h2>
-      <form action="/create_playlist" method="POST">
-         <input type="text" name="name" placeholder="Nombre de la playlist" required>
-         <button type="submit">Crear</button>
-      </form>
-      <h2>Importar playlist de YouTube</h2>
-
-      <input type="text" id="yt-url" placeholder="URL playlist YouTube">
-      <button onclick="importYT()">Importar</button>
-         <ul>
-         {% for playlist in playlists %}
-         <li class="playlist-item" data-playlist="{{ playlist.id }}">
-
-            <div class="playlist-name-wrapper">
-               <span class="playlist-name">
-                  <a href="{{ url_for('playlist.view_playlist', playlist_id=playlist.id) }}">{{ playlist.name }}</a>
-               </span>
-            </div>
-
-            <div class="playlist-actions">
-               <input class="rename-input" type="text" style="display:none;">
-               <button class="playlist-btn rename-playlist-btn" data-playlist="{{ playlist.id }}">
-                  Renombrar
-               </button>
-
-               <button class="playlist-btn delete-playlist-btn" data-playlist="{{ playlist.id }}">
-                  Eliminar
-               </button>
-            </div>
-
-         </li>
-         {% endfor %}
-         </ul>
-
-      <script src="{{ url_for('static', filename='playlists.js') }}"></script>
-
-      <!-- ================= FOOTER CONTADOR ================= -->
-      <div class="song-count-footer" id="playlist-count-footer">
-         <span id="playlist-count-num">{{ playlists | length }}</span> playlist<span id="playlist-count-plural">{% if playlists | length != 1 %}s{% endif %}</span> en tu biblioteca
+      <input class="rename-input" type="text" style="display:none;" placeholder="Nuevo nombre...">
+      <div class="pl-actions">
+        <button class="btn btn-ghost btn-sm rename-playlist-btn" data-playlist="{{ playlist.id }}">Renombrar</button>
+        <button class="btn btn-danger btn-sm delete-playlist-btn" data-playlist="{{ playlist.id }}">Eliminar</button>
       </div>
-   <script src="{{ url_for('static', filename='session_guard.js') }}"></script>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state animate-in" style="animation-delay:0.15s;">
+    <p>Todavía no tienes playlists.<br>¡Crea una ahora!</p>
+  </div>
+  {% endif %}
+
+  <div style="margin-top:20px;" class="animate-in" style="animation-delay:0.2s;">
+    <span class="count-badge" id="playlist-count-footer">
+      <strong id="playlist-count-num">{{ playlists | length }}</strong>
+      playlist<span id="playlist-count-plural">{% if playlists | length != 1 %}s{% endif %}</span>
+    </span>
+  </div>
+
+</main>
+
+<script src="{{ url_for('static', filename='common.js') }}"></script>
+<script src="{{ url_for('static', filename='playlists.js') }}"></script>
+<script src="{{ url_for('static', filename='session_guard.js') }}"></script>
 </body>
 </html>

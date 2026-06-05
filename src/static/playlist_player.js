@@ -362,3 +362,93 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+// =============================================================================
+// MENÚ MÓVIL + PLAYER BAR (código movido desde playlist_view.html)
+// =============================================================================
+
+// Menú móvil
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+    if (menu) menu.classList.toggle('show');
+}
+window.toggleMobileMenu = toggleMobileMenu;
+window.toggleMenu = toggleMobileMenu;
+
+document.addEventListener('click', function (e) {
+    const menu = document.getElementById('mobileMenu');
+    const btn = document.querySelector('.menu-toggle-btn');
+    if (!menu || !btn) return;
+    if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('show');
+});
+
+// Player bar — progress + sincronización de nombre de canción
+document.addEventListener('DOMContentLoaded', function () {
+    const audio = document.getElementById('player');
+    if (!audio) return;
+
+    const fill = document.getElementById('progressFill');
+    const cur = document.getElementById('currentTime');
+    const tot = document.getElementById('totalTime');
+    const ppBtnBar = document.getElementById('playPauseBtnBar');
+    const ppBtn = document.getElementById('playPauseBtn');
+    const songNameBar = document.getElementById('playerBarSongName');
+    const currentTitle = document.getElementById('currentSongTitle');
+    const progressTrack = document.getElementById('progressTrack');
+
+    function fmt(s) {
+        const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    audio.addEventListener('timeupdate', function () {
+        if (!audio.duration) return;
+        if (fill) fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        if (cur) cur.textContent = fmt(audio.currentTime);
+    });
+
+    audio.addEventListener('loadedmetadata', function () {
+        if (tot) tot.textContent = fmt(audio.duration);
+    });
+
+    audio.addEventListener('play', function () {
+        [ppBtnBar, ppBtn].forEach(function (b) { if (b) b.textContent = '⏸'; });
+    });
+
+    audio.addEventListener('pause', function () {
+        [ppBtnBar, ppBtn].forEach(function (b) { if (b) b.textContent = '▶'; });
+    });
+
+    if (progressTrack) {
+        progressTrack.addEventListener('click', function (e) {
+            const r = this.getBoundingClientRect();
+            audio.currentTime = (e.clientX - r.left) / r.width * audio.duration;
+        });
+    }
+
+    // Sincroniza el nombre de la canción con la barra del reproductor
+    if (currentTitle && songNameBar) {
+        const obs = new MutationObserver(function () {
+            songNameBar.textContent = currentTitle.textContent || 'Sin reproducir';
+        });
+        obs.observe(currentTitle, { childList: true, subtree: true, characterData: true });
+    }
+
+    // Resalta la canción activa en la lista al reproducir
+    audio.addEventListener('play', function () {
+        const src = document.getElementById('audioSource') ? document.getElementById('audioSource').src : '';
+        const fn = decodeURIComponent(src.split('/play/').pop());
+        document.querySelectorAll('.song-item').forEach(function (el) {
+            el.classList.toggle('playing', el.dataset.filename === fn);
+        });
+        if (songNameBar && currentTitle) {
+            songNameBar.textContent = currentTitle.textContent || 'Sin reproducir';
+        }
+    });
+});
+
+// togglePlayPause expuesto globalmente (usado por el botón del player bar)
+window.togglePlayPause = function () {
+    const audio = document.getElementById('player');
+    if (audio) audio.paused ? audio.play() : audio.pause();
+};

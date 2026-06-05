@@ -24,24 +24,39 @@
 //   Chart.js (cargado en el HTML) — para las gráficas tipo doughnut
 // =============================================================================
 
+// ===============================
+// MENÚ MÓVIL (navbar hamburger)
+// ===============================
+function toggleMobileMenu() {
+    const menu = document.getElementById("mobileMenu");
+    if (menu) menu.classList.toggle("show");
+}
+window.toggleMobileMenu = toggleMobileMenu;
+
+document.addEventListener("click", function (e) {
+    const menu = document.getElementById("mobileMenu");
+    const btn  = document.querySelector(".menu-toggle-btn");
+    if (!menu || !btn) return;
+    if (!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove("show");
+});
+
+// ===============================
+// CHART.JS — Defaults para tema oscuro
+// ===============================
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.Chart) {
+        Chart.defaults.color = "#8a94b0";
+        Chart.defaults.borderColor = "rgba(255,255,255,0.06)";
+        Chart.defaults.font.family = "'DM Sans', sans-serif";
+    }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
 
     // ===============================
-    // MENÚ DESPLEGABLE DE NAVEGACIÓN
+    // ALIAS DE MENÚ (compatibilidad)
     // ===============================
-    window.toggleMenu = function () {
-        const menu = document.getElementById("dropdownMenu");
-        if (menu) menu.classList.toggle("show");
-    };
-
-    document.addEventListener("click", function (e) {
-        const menu = document.getElementById("dropdownMenu");
-        const btn = document.querySelector(".menu-toggle");
-        if (!menu || !btn) return;
-        if (!menu.contains(e.target) && !btn.contains(e.target)) {
-            menu.classList.remove("show");
-        }
-    });
+    window.toggleMenu = toggleMobileMenu;
 
     // ===============================
     // BAN / UNBAN DE USUARIOS
@@ -304,25 +319,27 @@ document.addEventListener("DOMContentLoaded", () => {
     function buildUserRow(u) {
         // Construye el HTML de una fila exactamente igual al que genera Jinja
         const bannedText = u.banned_until
-            ? u.banned_until
-            : "No";
+            ? `<span class="banned-pill">${u.banned_until}</span>`
+            : `<span class="ok-pill">—</span>`;
+
+        const roleBadge = `<span class="role-badge ${u.role}">${u.role}</span>`;
 
         return `<tr data-user-id="${u.id}">
-            <td>${u.id}</td>
+            <td style="color:var(--text-muted);">${u.id}</td>
             <td>${u.username}</td>
-            <td>${u.role}</td>
+            <td>${roleBadge}</td>
             <td>${bannedText}</td>
             <td>
                 <form action="/admin/ban_user" method="POST">
                     <input type="hidden" name="user_id" value="${u.id}">
-                    <input type="number" name="hours" class="ban-hours-input" placeholder="Horas de ban" style="display:none; width:80px;">
-                    <button type="button" class="ban">Ban</button>
+                    <input type="number" name="hours" class="ban-hours-input" placeholder="Horas" style="display:none; width:70px;">
+                    <button type="button" class="tbl-btn ban">Ban</button>
                 </form>
             </td>
             <td>
                 <form action="/admin/unban_user" method="POST">
                     <input type="hidden" name="username" value="${u.username}">
-                    <button class="unban">Unban</button>
+                    <button class="tbl-btn unban">Unban</button>
                 </form>
             </td>
             <td>
@@ -331,19 +348,19 @@ document.addEventListener("DOMContentLoaded", () => {
                         <option value="user"${u.role === "user" ? " selected" : ""}>user</option>
                         <option value="admin"${u.role === "admin" ? " selected" : ""}>admin</option>
                     </select>
-                    <button type="button" class="role-btn">Actualizar</button>
+                    <button type="button" class="tbl-btn role-btn">Rol</button>
                 </form>
             </td>
             <td>
                 <form action="/admin/change_password/${u.username}" method="POST" class="password-form">
-                    <input type="password" name="password" placeholder="Nueva contraseña"
+                    <input type="password" name="password" placeholder="Nueva pass"
                         class="password-input" style="display:none;" required>
-                    <button type="button" class="change-password-btn">Cambiar</button>
+                    <button type="button" class="tbl-btn change-password-btn">Pass</button>
                 </form>
             </td>
             <td>
                 <form action="/admin/delete/${u.id}" method="POST">
-                    <button class="delete">Eliminar</button>
+                    <button class="tbl-btn delete">Borrar</button>
                 </form>
             </td>
         </tr>`;

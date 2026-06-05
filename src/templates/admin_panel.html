@@ -1,346 +1,275 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseStream - Panel de Administración</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseStream — Panel Admin</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse-compat.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
+<body>
 
-<body class="admin-body">
+<!-- ═══════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <div class="pulse-dot"></div>
+    PulseStream
+  </div>
 
-<!-- ================= NAVBAR ================= -->
+  <div class="nav-center">
+    <a class="nav-link" onclick="location.href='/'">Biblioteca</a>
+    <a class="nav-link" onclick="location.href='/playlists'">Playlists</a>
+    <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+    <a class="nav-link" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+    <a class="nav-link active" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+  </div>
 
-<div class="navbar">
-
-    <!-- Contenedor izquierdo: menu toggle + dropdown -->
-    <div class="menu-container">
-        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
-
-        <div id="dropdownMenu" class="dropdown-menu">
-
-            {% if session['user_id'] and session.get('role') == 'admin' %}
-            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
-                Panel admin
-            </button>
-            {% endif %}
-
-            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
-                Upload
-            </button>
-
-            <button onclick="location.href='/playlists'">
-                Playlists
-            </button>
-
-            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
-                Youtube
-            </button>
-
-            <button onclick="location.href='/'" class="active">
-                Inicio
-            </button>
-
-        </div>
-    </div>
-
-    <!-- Botón de cerrar sesión -->
-    <button class="logout" onclick="location.href='/logout'">
-        Cerrar sesión
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button class="btn-logout" onclick="location.href='/logout'">Salir</button>
+    <button class="menu-toggle-btn" onclick="toggleMobileMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
     </button>
+  </div>
+</nav>
 
+<div class="mobile-menu" id="mobileMenu">
+  <a class="nav-link" onclick="location.href='/'">Biblioteca</a>
+  <a class="nav-link" onclick="location.href='/playlists'">Playlists</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+  <a class="nav-link active" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+  <button class="btn-logout" onclick="location.href='/logout'" style="margin-top:4px;">Salir</button>
 </div>
 
-<div class="admin-container">
+<!-- ═══════════════════════════════════════
+     CONTENT
+═══════════════════════════════════════ -->
+<main class="page-wrap" style="max-width:1100px;">
 
-    <h1>Panel de Administración</h1>
+  <div class="page-header animate-in">
+    <div class="section-label">Administración</div>
+    <h1>Panel de Control</h1>
+  </div>
 
-
-    <!-- ========================= -->
-    <!-- CREAR USUARIO -->
-    <!-- ========================= -->
-
-    <h2>Crear usuario</h2>
-
-    <form method="POST" class="create-user">
-
-        <input
-            type="text"
-            name="username"
-            placeholder="Usuario"
-            required
-        >
-
-        <input
-            type="password"
-            name="password"
-            placeholder="Contraseña"
-            required
-        >
-
-        <select name="role">
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+  <!-- ── CREAR USUARIO ── -->
+  <div class="admin-section animate-in" style="animation-delay:0.05s;">
+    <div class="section-label">Nuevo usuario</div>
+    <div class="card">
+      <form method="POST" class="create-user-form create-user">
+        <input class="input-field" type="text" name="username" placeholder="Nombre de usuario" required>
+        <input class="input-field" type="password" name="password" placeholder="Contraseña" required>
+        <select class="input-field" name="role" style="max-width:140px;">
+          <option value="user">Usuario</option>
+          <option value="admin">Admin</option>
         </select>
+        <button class="btn btn-primary" type="submit">+ Crear</button>
+      </form>
+    </div>
+  </div>
 
-        <button type="submit">Crear</button>
+  <!-- ── TABLA DE USUARIOS ── -->
+  <div class="admin-section animate-in" style="animation-delay:0.09s;">
+    <div class="section-label">Gestión de usuarios</div>
 
+    <form method="GET" class="search-form">
+      <input class="input-field" type="text" name="search" placeholder="Buscar usuario..." value="{{ search }}">
+      <button class="btn btn-secondary" type="submit">Buscar</button>
     </form>
 
-
-<!-- ========================= -->
-<!-- BUSCADOR -->
-<!-- ========================= -->
-
-<h2>Usuarios</h2>
-
-<form method="GET" class="search-form">
-    <input
-        type="text"
-        name="search"
-        placeholder="Buscar usuario..."
-        value="{{ search }}"
-    >
-    <button type="submit">Buscar</button>
-</form>
-
-<div class="users-table-container">
-
-<table>
-
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Username</th>
-        <th>Rol</th>
-        <th>Baneado hasta</th>
-        <th>Banear</th>
-        <th>Desbanear</th>
-        <th>Cambiar Rol</th>
-        <th>Cambiar contraseña</th>
-        <th>Eliminar</th>
-    </tr>
-    </thead>
-
-    <tbody>
-
-    {% for user in users %}
-
-        <tr>
-
-            <td>{{ user.id }}</td>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Baneado hasta</th>
+            <th>Banear</th>
+            <th>Desbanear</th>
+            <th>Cambiar rol</th>
+            <th>Contraseña</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td style="color:var(--text-muted);">{{ user.id }}</td>
 
             <td>{{ user.username }}</td>
 
-            <td>{{ user.role }}</td>
-
             <td>
-                {% if user.banned_until %}
-                    {{ user.banned_until.strftime("%d/%m/%Y %H:%M") }}
-                {% else %}
-                    No
-                {% endif %}
+              <span class="role-badge {{ user.role }}">{{ user.role }}</span>
             </td>
 
             <td>
-
-                <form action="/admin/ban_user" method="POST">
-                    <input type="hidden" name="user_id" value="{{ user.id }}">
-                    <input type="number" name="hours" class="ban-hours-input" placeholder="Horas de ban" style="display:none; width:80px;">
-                    <button type="button" class="ban">Ban</button>
-                </form>
-
+              {% if user.banned_until %}
+                <span class="banned-pill">{{ user.banned_until.strftime("%d/%m/%Y %H:%M") }}</span>
+              {% else %}
+                <span class="ok-pill">—</span>
+              {% endif %}
             </td>
 
             <td>
-
-                <form action="/admin/unban_user" method="POST">
-
-                    <input
-                        type="hidden"
-                        name="username"
-                        value="{{ user.username }}"
-                    >
-
-                    <button class="unban">
-                        Unban
-                    </button>
-
-                </form>
-
+              <form action="/admin/ban_user" method="POST">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <input type="number" name="hours" class="ban-hours-input" placeholder="Horas" style="display:none; width:70px;">
+                <button type="button" class="tbl-btn ban">Ban</button>
+              </form>
             </td>
 
             <td>
-
-                <form method="POST" action="{{ url_for('admin.change_role', username=user.username) }}" class="role-form">
-                    <select name="role" class="role-select" style="display:none;">
-                        <option value="user" {% if user.role == 'user' %}selected{% endif %}>user</option>
-                        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>admin</option>
-                    </select>
-                    <button type="button" class="role-btn">Actualizar</button>
-                </form>
-
+              <form action="/admin/unban_user" method="POST">
+                <input type="hidden" name="username" value="{{ user.username }}">
+                <button class="tbl-btn unban">Unban</button>
+              </form>
             </td>
 
             <td>
-
-                <form action="/admin/change_password/{{ user.username }}" method="POST" class="password-form">
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Nueva contraseña"
-                        class="password-input"
-                        style="display:none;"
-                        required
-                    >
-
-                    <button type="button" class="change-password-btn">
-                        Cambiar
-                    </button>
-                </form>
-
+              <form method="POST" action="{{ url_for('admin.change_role', username=user.username) }}" class="role-form">
+                <select name="role" class="role-select" style="display:none;">
+                  <option value="user" {% if user.role == 'user' %}selected{% endif %}>user</option>
+                  <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>admin</option>
+                </select>
+                <button type="button" class="tbl-btn role-btn">Rol</button>
+              </form>
             </td>
 
             <td>
-
-                <form action="/admin/delete/{{ user.id }}" method="POST">
-
-                    <button class="delete">
-                        Eliminar
-                    </button>
-
-                </form>
-
+              <form action="/admin/change_password/{{ user.username }}" method="POST" class="password-form">
+                <input type="password" name="password" placeholder="Nueva pass" class="password-input" style="display:none;" required>
+                <button type="button" class="tbl-btn change-password-btn">Pass</button>
+              </form>
             </td>
 
-        </tr>
+            <td>
+              <form action="/admin/delete/{{ user.id }}" method="POST">
+                <button class="tbl-btn delete">Borrar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    {% endfor %}
+  <!-- ── STATS ── -->
+  <div class="stats-wrapper animate-in" style="animation-delay:0.14s;">
 
-    </tbody>
-
-</table>
-
-</div>
-
-<!-- ========================= -->
-<!-- STATS -->
-<!-- ========================= -->
-
-<div class="stats-wrapper">
-
-    <!-- ========================= -->
-    <!-- RECURSOS DEL SISTEMA -->
-    <!-- ========================= -->
+    <!-- Sistema -->
     <div class="stats-section">
+      <div class="section-label">Recursos del sistema</div>
+      <div class="stats-grid">
 
-        <h2>Recursos del sistema</h2>
-
-        <div class="system-stats">
-
-            <div class="stat-box">
-                <h3>CPU</h3>
-                <canvas id="cpuChart"></canvas>
-                <p id="cpuText">{{ stats.cpu }}%</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>RAM</h3>
-                <canvas id="ramChart"></canvas>
-                <p id="ramText">{{ stats.ram_percent }}%</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Disco</h3>
-                <canvas id="diskChart"></canvas>
-                <p id="diskText">{{ stats.disk_percent }}%</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Red - Subida</h3>
-                <canvas id="netUpChart"></canvas>
-                <p id="netUpText">0 MB/s</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Red - Bajada</h3>
-                <canvas id="netDownChart"></canvas>
-                <p id="netDownText">0 MB/s</p>
-            </div>
-
+        <div class="stat-box" style="animation-delay:0.16s;">
+          <h3>CPU</h3>
+          <canvas id="cpuChart"></canvas>
+          <p id="cpuText">{{ stats.cpu }}%</p>
         </div>
 
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- ESTADÍSTICAS SERVIDOR -->
-    <!-- ========================= -->
-    <div class="stats-section">
-
-        <h2>Estadísticas del servidor</h2>
-
-        <div class="system-stats">
-
-            <div class="stat-box">
-                <h3>Usuarios</h3>
-                <p class="big-stat" id="stat-users">{{ server_stats.total_users }}</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Canciones</h3>
-                <p class="big-stat" id="stat-songs">{{ server_stats.total_songs }}</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Reproducciones</h3>
-                <p class="big-stat" id="stat-plays">{{ server_stats.total_plays }}</p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Top canción</h3>
-                <p id="stat-top-song">
-                {% if server_stats.top_song %}
-                    {{ server_stats.top_song.title }}
-                    <br>
-                    ({{ server_stats.top_song.plays }} plays)
-                {% else %}
-                    Sin datos
-                {% endif %}
-                </p>
-            </div>
-
-            <div class="stat-box">
-                <h3>Top uploader</h3>
-                <p id="stat-top-user">
-                {% if server_stats.top_user %}
-                    {{ server_stats.top_user.username }}
-                    <br>
-                    ({{ server_stats.top_user.total }} canciones)
-                {% else %}
-                    Sin datos
-                {% endif %}
-                </p>
-            </div>
-
+        <div class="stat-box" style="animation-delay:0.18s;">
+          <h3>RAM</h3>
+          <canvas id="ramChart"></canvas>
+          <p id="ramText">{{ stats.ram_percent }}%</p>
         </div>
 
+        <div class="stat-box" style="animation-delay:0.20s;">
+          <h3>Disco</h3>
+          <canvas id="diskChart"></canvas>
+          <p id="diskText">{{ stats.disk_percent }}%</p>
+        </div>
+
+        <div class="stat-box" style="animation-delay:0.22s;">
+          <h3>Red — Subida</h3>
+          <canvas id="netUpChart"></canvas>
+          <p id="netUpText">0 MB/s</p>
+        </div>
+
+        <div class="stat-box" style="animation-delay:0.24s;">
+          <h3>Red — Bajada</h3>
+          <canvas id="netDownChart"></canvas>
+          <p id="netDownText">0 MB/s</p>
+        </div>
+
+      </div>
     </div>
 
-</div>
+    <!-- Servidor -->
+    <div class="stats-section">
+      <div class="section-label">Estadísticas del servidor</div>
+      <div class="stats-grid">
+
+        <div class="stat-box" style="animation-delay:0.17s;">
+          <h3>Usuarios</h3>
+          <div class="stat-box-value">
+            <p class="big-stat" id="stat-users">{{ server_stats.total_users }}</p>
+          </div>
+        </div>
+
+        <div class="stat-box" style="animation-delay:0.19s;">
+          <h3>Canciones</h3>
+          <div class="stat-box-value">
+            <p class="big-stat" id="stat-songs" style="color:var(--accent-cyan) !important;">{{ server_stats.total_songs }}</p>
+          </div>
+        </div>
+
+        <div class="stat-box" style="animation-delay:0.21s;">
+          <h3>Reproducciones</h3>
+          <div class="stat-box-value">
+            <p class="big-stat" id="stat-plays" style="color:var(--accent-purple) !important;">{{ server_stats.total_plays }}</p>
+          </div>
+        </div>
+
+        <div class="stat-box" style="animation-delay:0.23s;">
+          <h3>Top canción</h3>
+          <div class="stat-box-value">
+            <p id="stat-top-song" style="font-size:0.82rem; line-height:1.4;">
+              {% if server_stats.top_song %}
+                <strong style="color:var(--text-primary);">{{ server_stats.top_song.title }}</strong><br>
+                <span style="color:var(--accent-green); font-size:0.72rem;">{{ server_stats.top_song.plays }} plays</span>
+              {% else %}
+                <span style="color:var(--text-muted);">Sin datos</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        <div class="stat-box" style="animation-delay:0.25s;">
+          <h3>Top uploader</h3>
+          <div class="stat-box-value">
+            <p id="stat-top-user" style="font-size:0.82rem; line-height:1.4;">
+              {% if server_stats.top_user %}
+                <strong style="color:var(--text-primary);">{{ server_stats.top_user.username }}</strong><br>
+                <span style="color:var(--accent-cyan); font-size:0.72rem;">{{ server_stats.top_user.total }} canciones</span>
+              {% else %}
+                <span style="color:var(--text-muted);">Sin datos</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+// Datos del servidor inyectados por Jinja (necesarios antes de cargar admin.js)
 window.systemStats = {
-    cpu: {{ stats.cpu }},
-    ram: {{ stats.ram_percent }},
-    disk: {{ stats.disk_percent }},
-    net_recv: {{ stats.net_recv }},
-    net_sent: {{ stats.net_sent }}
+  cpu:      {{ stats.cpu }},
+  ram:      {{ stats.ram_percent }},
+  disk:     {{ stats.disk_percent }},
+  net_recv: {{ stats.net_recv }},
+  net_sent: {{ stats.net_sent }}
 };
 </script>
 

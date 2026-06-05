@@ -1,147 +1,204 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseStream - {{ current_song }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseStream — {{ current_song }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='pulse-compat.css') }}">
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 </head>
-
 <body>
 
-<!-- ================= NAVBAR ================= -->
+<!-- ═══════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════ -->
+<nav class="navbar">
 
-<div class="navbar">
+  <div class="navbar-brand">
+    <div class="pulse-dot"></div>
+    PulseStream
+  </div>
 
-    <!-- Contenedor izquierdo: menu toggle + dropdown -->
-    <div class="menu-container">
-        <button class="menu-toggle" onclick="toggleMenu()">Menu</button>
+  <!-- Desktop nav links -->
+  <div class="nav-center">
+    <a class="nav-link active" onclick="location.href='/'">
+      Biblioteca
+    </a>
+    <a class="nav-link" onclick="location.href='/playlists'">
+      Playlists
+    </a>
+    <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
+      ▶ YouTube
+    </a>
+    <a class="nav-link" onclick="location.href='{{ url_for('upload.upload_file') }}'">
+      Subir
+    </a>
+    {% if session['user_id'] and session.get('role') == 'admin' %}
+    <a class="nav-link" onclick="location.href='{{ url_for('admin.admin_panel') }}'">
+      Admin
+    </a>
+    {% endif %}
+  </div>
 
-        <div id="dropdownMenu" class="dropdown-menu">
-
-            {% if session['user_id'] and session.get('role') == 'admin' %}
-            <button onclick="location.href='{{ url_for('admin.admin_panel') }}'">
-                Panel admin
-            </button>
-            {% endif %}
-
-            <button onclick="location.href='{{ url_for('upload.upload_file') }}'">
-                Upload
-            </button>
-
-            <button onclick="location.href='/playlists'">
-                Playlists
-            </button>
-
-            <button onclick="location.href='{{ url_for('youtube.youtube_page') }}'">
-                Youtube
-            </button>
-
-            <button onclick="location.href='/'" class="active">
-                Inicio
-            </button>
-
-        </div>
-    </div>
-
-    <!-- Botón de cerrar sesión -->
-    <button class="logout" onclick="location.href='/logout'">
-        Cerrar sesión
+  <div style="display:flex; align-items:center; gap:10px;">
+    <button class="btn-logout" onclick="location.href='/logout'">Salir</button>
+    <button class="menu-toggle-btn" onclick="toggleMobileMenu()" aria-label="Menú">
+      <span></span><span></span><span></span>
     </button>
+  </div>
 
+</nav>
+
+<!-- Mobile dropdown -->
+<div class="mobile-menu" id="mobileMenu">
+  <a class="nav-link active" onclick="location.href='/'">Biblioteca</a>
+  <a class="nav-link" onclick="location.href='/playlists'">Playlists</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('youtube.youtube_page') }}'">▶ YouTube</a>
+  <a class="nav-link" onclick="location.href='{{ url_for('upload.upload_file') }}'">Subir</a>
+  {% if session['user_id'] and session.get('role') == 'admin' %}
+  <a class="nav-link" onclick="location.href='{{ url_for('admin.admin_panel') }}'">Admin</a>
+  {% endif %}
+  <button class="btn-logout" onclick="location.href='/logout'" style="margin-top:4px;">Salir</button>
 </div>
 
-<!-- ================= CONTENIDO ================= -->
- 
-<!--
-<div class="logo-container">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
-</div>
--->
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════ -->
+<main class="page-wrap">
 
-<h1>Bienvenido, {{ session['user_id'] }}</h1>
-<h2>Canción actual: <span id="currentSongTitle">{{ current_song }}</span></h2>
-
-<div class="playback-controls">
-    <button onclick="handlePreviousClick()">Anterior</button>
-    <audio id="player" controls>
-        <source id="audioSource" src="" type="audio/mpeg">
-    </audio>
-    <button onclick="handleNextClick()">Siguiente</button>
-</div>
-
-<form id="searchForm" class="search-form">
-    <input type="text" id="searchInput" placeholder="Buscar canciones...">
-    <button type="submit">Buscar</button>
-    <button type="button" id="resetSearch">Reiniciar</button>
-</form>
-
-<div class="mode-controls">
-
-    <div class="toggle-container" onclick="toggleShuffleUI()">
-        <span>Modo Aleatorio</span>
-        <div id="shuffleToggle" class="toggle-switch">
-            <div class="toggle-knob"></div>
-        </div>
+  <div class="library-header animate-in">
+    <div>
+      <div class="section-label">Biblioteca</div>
+      <h1>Hola, {{ session['user_id'] }} 👋</h1>
     </div>
-
-    <div class="toggle-container" onclick="toggleLoopUI()">
-        <span>Modo Bucle</span>
-        <div id="loopToggle" class="toggle-switch">
-            <div class="toggle-knob"></div>
-        </div>
+    <div class="library-meta">
+      <span class="count-badge"><strong>{{ songs | length }}</strong> canción{% if songs | length != 1 %}es{% endif %}</span>
+      <h2 id="currentSongTitle" style="color: var(--accent-green); font-size: 0.85rem; font-family: 'DM Sans', sans-serif; font-weight: 400; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        {{ current_song if current_song else 'Selecciona una canción' }}
+      </h2>
     </div>
+  </div>
 
-</div>
+  <!-- Controls row -->
+  <div class="mode-row animate-in" style="animation-delay:0.06s;">
+    <!-- Shuffle -->
+    <div class="toggle-wrap" onclick="toggleShuffleUI()">
+      <div id="shuffleToggle" class="toggle-track">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span>Aleatorio</span>
+    </div>
+    <!-- Loop -->
+    <div class="toggle-wrap" onclick="toggleLoopUI()">
+      <div id="loopToggle" class="toggle-track">
+        <div class="toggle-thumb"></div>
+      </div>
+      <span>Bucle</span>
+    </div>
+  </div>
 
-<ul id="songList">
-{% for song in songs %}
-<li class="song-item" data-filename="{{ song }}">
+  <!-- Search -->
+  <div class="search-bar animate-in" style="animation-delay:0.1s;">
+    <form id="searchForm" style="display:contents;">
+      <input
+        class="input-field"
+        type="text"
+        id="searchInput"
+        placeholder="Buscar en tu biblioteca..."
+      >
+      <button class="btn btn-secondary btn-sm" type="submit" style="flex-shrink:0; padding:10px 16px;">Buscar</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="resetSearch" style="flex-shrink:0; padding:10px 14px;">✕</button>
+    </form>
+  </div>
 
-    <span class="song-title">{{ song }}</span>
-
-    <div class="song-actions">
-
-        <!-- BORRAR -->
-        <button class="delete-song-btn"
-                data-filename="{{ song }}">
-            Borrar
-        </button>
-
-        <!-- PLAYLIST -->
-        <div class="playlist-wrapper">
-
-            <button class="add-btn">+</button>
-
+  <!-- Song list -->
+  <div class="section-label" style="margin-bottom:10px;">Canciones</div>
+  <div class="song-list-scroll">
+    {% if songs %}
+    <ul class="song-list" id="songList">
+      {% for song in songs %}
+      <li class="song-item" data-filename="{{ song }}">
+        <div class="song-num">
+          <span class="song-num-text">{{ loop.index }}</span>
+          <span class="song-num-play">▶</span>
+        </div>
+        <div class="song-info">
+          <div class="song-title">{{ song }}</div>
+        </div>
+        <div class="song-actions">
+          <!-- Add to playlist -->
+          <div class="playlist-wrapper" style="position:static;">
+            <button class="btn btn-ghost btn-sm add-btn" title="Añadir a playlist">+</button>
             <div class="playlist-dropdown">
-                {% for playlist in playlists %}
-                    <div class="playlist-option"
-                         data-playlist="{{ playlist.id }}">
-                        {{ playlist.name }}
-                    </div>
-                {% endfor %}
+              {% for playlist in playlists %}
+              <div class="playlist-option" data-playlist="{{ playlist.id }}">
+                 {{ playlist.name }}
+              </div>
+              {% endfor %}
             </div>
-
+          </div>
+          <!-- Delete -->
+          <button class="btn btn-danger btn-sm delete-song-btn" data-filename="{{ song }}" title="Eliminar">✕</button>
         </div>
-
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon"></div>
+      <p>No hay canciones en tu biblioteca todavía.</p>
+      <a class="btn btn-primary" href="{{ url_for('upload.upload_file') }}" style="margin-top:16px; display:inline-flex;">
+        ↑ Subir canciones
+      </a>
     </div>
+    {% endif %}
+  </div>
 
-</li>
-{% endfor %}
-</ul>
+</main>
+
+<!-- ═══════════════════════════════════════
+     PLAYER BAR
+═══════════════════════════════════════ -->
+<div class="player-bar">
+
+  <div class="player-info">
+    <div class="player-thumb"></div>
+    <div>
+      <div class="player-song-name" id="playerSongName">Sin reproducir</div>
+      <div class="player-sub">PulseStream</div>
+    </div>
+  </div>
+
+  <div class="player-controls">
+    <button class="ctrl-btn" onclick="handlePreviousClick()" title="Anterior">⏮</button>
+    <button class="ctrl-btn play-pause" id="playPauseBtn" onclick="playPause()" title="Play/Pausa">▶</button>
+    <button class="ctrl-btn" onclick="handleNextClick()" title="Siguiente">⏭</button>
+  </div>
+
+  <div class="player-progress">
+    <span class="progress-time" id="currentTime">0:00</span>
+    <div class="progress-track" id="progressTrack">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <span class="progress-time" id="totalTime">0:00</span>
+  </div>
+
+</div>
+
+<!-- Hidden audio element (JS uses it) -->
+<audio id="player">
+  <source id="audioSource" src="" type="audio/mpeg">
+</audio>
 
 <script>
+// Datos inyectados por Jinja
 window.songs = {{ songs | tojson }};
 window.currentSongIndex = 0;
 </script>
 
+<script src="{{ url_for('static', filename='common.js') }}"></script>
 <script src="{{ url_for('static', filename='player.js') }}"></script>
-
-<!-- ================= FOOTER CONTADOR ================= -->
-<div class="song-count-footer">
-    {{ songs | length }} canción{% if songs | length != 1 %}es{% endif %} en tu biblioteca
-</div>
-
 <script src="{{ url_for('static', filename='session_guard.js') }}"></script>
 </body>
 </html>

@@ -384,3 +384,70 @@ document.addEventListener("DOMContentLoaded", () => {
     if (player && getSongs().length > 0) loadSong(currentSongIndex);
     updateCounter();
 });
+
+// =============================================================================
+// PLAYER BAR — código movido desde index.html
+// =============================================================================
+document.addEventListener('DOMContentLoaded', function () {
+    const audio         = document.getElementById('player');
+    if (!audio) return;
+
+    const progressFill  = document.getElementById('progressFill');
+    const currentTimeEl = document.getElementById('currentTime');
+    const totalTimeEl   = document.getElementById('totalTime');
+    const playPauseBtn  = document.getElementById('playPauseBtn');
+    const playerSongName = document.getElementById('playerSongName');
+    const progressTrack = document.getElementById('progressTrack');
+    const songTitleEl   = document.getElementById('currentSongTitle');
+
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+    }
+
+    audio.addEventListener('timeupdate', function () {
+        if (!audio.duration) return;
+        if (progressFill) progressFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+    });
+
+    audio.addEventListener('loadedmetadata', function () {
+        if (totalTimeEl) totalTimeEl.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener('play', function () {
+        if (playPauseBtn) playPauseBtn.textContent = '⏸';
+    });
+
+    audio.addEventListener('pause', function () {
+        if (playPauseBtn) playPauseBtn.textContent = '▶';
+    });
+
+    if (progressTrack) {
+        progressTrack.addEventListener('click', function (e) {
+            const rect = this.getBoundingClientRect();
+            audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+        });
+    }
+
+    // Sincroniza el nombre de la canción en la barra inferior
+    if (songTitleEl && playerSongName) {
+        const observer = new MutationObserver(function () {
+            playerSongName.textContent = songTitleEl.textContent || 'Sin reproducir';
+        });
+        observer.observe(songTitleEl, { childList: true, subtree: true, characterData: true });
+    }
+
+    // Resalta la canción activa en la lista
+    audio.addEventListener('play', function () {
+        const src = document.getElementById('audioSource') ? document.getElementById('audioSource').src : '';
+        const filename = decodeURIComponent(src.split('/play/').pop());
+        document.querySelectorAll('.song-item').forEach(function (el) {
+            el.classList.toggle('playing', el.dataset.filename === filename);
+        });
+        if (songTitleEl && playerSongName) {
+            playerSongName.textContent = songTitleEl.textContent || 'Sin reproducir';
+        }
+    });
+});
